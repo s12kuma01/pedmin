@@ -12,18 +12,6 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-func (p *Player) handlePause(e *events.ComponentInteractionCreate, guildID snowflake.ID, paused bool) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player == nil {
-		_ = e.DeferUpdateMessage()
-		return
-	}
-	if err := player.Update(context.TODO(), lavalink.WithPaused(paused)); err != nil {
-		p.logger.Error("failed to pause/resume", slog.Any("error", err))
-	}
-	p.respondWithPlayerUpdate(e, player, guildID)
-}
-
 func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	player := p.lavalink.ExistingPlayer(guildID)
 	if player == nil {
@@ -45,50 +33,13 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 	p.respondWithPlayerUpdate(e, player, guildID)
 }
 
-func (p *Player) handlePrevious(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player == nil {
-		_ = e.DeferUpdateMessage()
-		return
-	}
-
-	queue := p.queues.Get(guildID)
-	prev, ok := queue.Previous()
-	if !ok {
-		if player.Track() != nil {
-			_ = player.Update(context.TODO(), lavalink.WithPosition(0))
-		}
-		p.respondWithPlayerUpdate(e, player, guildID)
-		return
-	}
-
-	if err := player.Update(context.TODO(), lavalink.WithTrack(prev)); err != nil {
-		p.logger.Error("failed to go previous", slog.Any("error", err))
-	}
-	p.respondWithPlayerUpdate(e, player, guildID)
-}
-
 func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player == nil {
-		_ = e.DeferUpdateMessage()
-		return
-	}
-
-	queue := p.queues.Get(guildID)
-	queue.Clear()
-	_ = player.Update(context.TODO(), lavalink.WithNullTrack())
-	p.respondWithPlayerUpdate(e, player, guildID)
-}
-
-func (p *Player) handleDisconnect(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	player := p.lavalink.ExistingPlayer(guildID)
 	if player != nil {
 		_ = player.Destroy(context.TODO())
 		p.lavalink.RemovePlayer(guildID)
 	}
 	p.queues.Delete(guildID)
-
 	_ = e.Client().UpdateVoiceState(context.TODO(), guildID, nil, false, false)
 
 	queue := p.queues.Get(guildID)
@@ -102,27 +53,6 @@ func (p *Player) handleLoop(e *events.ComponentInteractionCreate, guildID snowfl
 	queue.CycleLoop()
 
 	player := p.lavalink.Player(guildID)
-	p.respondWithPlayerUpdate(e, player, guildID)
-}
-
-func (p *Player) handleVolume(e *events.ComponentInteractionCreate, guildID snowflake.ID, delta int) {
-	player := p.lavalink.ExistingPlayer(guildID)
-	if player == nil {
-		_ = e.DeferUpdateMessage()
-		return
-	}
-
-	newVol := player.Volume() + delta
-	if newVol < 0 {
-		newVol = 0
-	}
-	if newVol > 200 {
-		newVol = 200
-	}
-
-	if err := player.Update(context.TODO(), lavalink.WithVolume(newVol)); err != nil {
-		p.logger.Error("failed to set volume", slog.Any("error", err))
-	}
 	p.respondWithPlayerUpdate(e, player, guildID)
 }
 
@@ -149,7 +79,7 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 			queue.Add(playlist.Tracks...)
 			queue.SetCurrent(0)
 
-			p.ensureVoiceConnection(e, guildID)
+			_ = p.joinVoiceChannel(e.Client(), guildID, e.Member().User.ID)
 			player := p.lavalink.Player(guildID)
 			_ = player.Update(context.TODO(), lavalink.WithTrack(playlist.Tracks[0]))
 		},
@@ -176,7 +106,7 @@ func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowf
 		queue.SetCurrent(0)
 	}
 
-	p.ensureVoiceConnection(e, guildID)
+	_ = p.joinVoiceChannel(e.Client(), guildID, e.Member().User.ID)
 	player := p.lavalink.Player(guildID)
 
 	if player.Track() == nil {
@@ -194,7 +124,36 @@ func (p *Player) respondWithPlayerUpdate(e *events.ComponentInteractionCreate, p
 	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}))
 }
 
+func (p *Player) trackMessage(guildID, channelID, messageID snowflake.ID) {
+	p.messages.Store(guildID, trackedMessage{
+		channelID: channelID,
+		messageID: messageID,
+	})
+}
+
+func (p *Player) deleteTrackedMessage(guildID snowflake.ID) {
+	val, ok := p.messages.LoadAndDelete(guildID)
+	if !ok {
+		return
+	}
+	tracked := val.(trackedMessage)
+	if err := p.client.Rest.DeleteMessage(tracked.channelID, tracked.messageID); err != nil {
+		p.logger.Warn("failed to delete tracked message", slog.Any("error", err))
+	}
+}
+
 func (p *Player) updatePlayerMessage(player disgolink.Player) {
-	queue := p.queues.Get(player.GuildID())
-	_ = BuildPlayerUI(player, queue)
+	guildID := player.GuildID()
+	val, ok := p.messages.Load(guildID)
+	if !ok {
+		return
+	}
+	tracked := val.(trackedMessage)
+
+	queue := p.queues.Get(guildID)
+	ui := BuildPlayerUI(player, queue)
+	if _, err := p.client.Rest.UpdateMessage(tracked.channelID, tracked.messageID, discord.NewMessageUpdateV2([]discord.LayoutComponent{ui})); err != nil {
+		p.logger.Warn("failed to update player message", slog.Any("error", err))
+		p.messages.Delete(guildID)
+	}
 }

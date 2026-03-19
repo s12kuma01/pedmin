@@ -2,21 +2,18 @@ package player
 
 import (
 	"context"
+	"errors"
 
-	"github.com/disgoorg/disgo/events"
+	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/snowflake/v2"
 )
 
-func (p *Player) ensureVoiceConnection(e *events.ModalSubmitInteractionCreate, guildID snowflake.ID) {
-	member := e.Member()
-	if member == nil {
-		return
-	}
+var errNotInVoiceChannel = errors.New("user not in voice channel")
 
-	voiceState, ok := e.Client().Caches.VoiceState(guildID, member.User.ID)
+func (p *Player) joinVoiceChannel(client *disgobot.Client, guildID, userID snowflake.ID) error {
+	voiceState, ok := client.Caches.VoiceState(guildID, userID)
 	if !ok || voiceState.ChannelID == nil {
-		return
+		return errNotInVoiceChannel
 	}
-
-	_ = e.Client().UpdateVoiceState(context.TODO(), guildID, voiceState.ChannelID, false, true)
+	return client.UpdateVoiceState(context.TODO(), guildID, voiceState.ChannelID, false, true)
 }

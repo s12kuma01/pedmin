@@ -14,7 +14,7 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 
 	if len(tracks) == 0 {
 		return discord.NewContainer(
-			discord.NewTextDisplay("### 📜 キュー"),
+			discord.NewTextDisplay("### キュー"),
 			discord.NewTextDisplay("キューは空です。"),
 			discord.NewLargeSeparator(),
 			discord.NewActionRow(
@@ -50,7 +50,7 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 	}
 
 	components := []discord.ContainerSubComponent{
-		discord.NewTextDisplay(fmt.Sprintf("### 📜 キュー (%d曲)", len(tracks))),
+		discord.NewTextDisplay(fmt.Sprintf("### キュー (%d曲)", len(tracks))),
 		discord.NewTextDisplay(strings.Join(lines, "\n")),
 		discord.NewLargeSeparator(),
 		discord.NewActionRow(

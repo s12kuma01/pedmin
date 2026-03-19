@@ -11,9 +11,9 @@ const (
 func (l LoopMode) String() string {
 	switch l {
 	case LoopTrack:
-		return "🔂 トラック"
+		return "リピート: トラック"
 	case LoopQueue:
-		return "🔁 キュー"
+		return "リピート: キュー"
 	default:
 		return "リピートオフ"
 	}

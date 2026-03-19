@@ -20,24 +20,12 @@ func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 	action, _, _ := strings.Cut(rest, ":")
 
 	switch action {
-	case "pause":
-		p.handlePause(e, *guildID, true)
-	case "resume":
-		p.handlePause(e, *guildID, false)
 	case "skip":
 		p.handleSkip(e, *guildID)
-	case "previous":
-		p.handlePrevious(e, *guildID)
 	case "stop":
 		p.handleStop(e, *guildID)
-	case "disconnect":
-		p.handleDisconnect(e, *guildID)
 	case "loop":
 		p.handleLoop(e, *guildID)
-	case "vol_down":
-		p.handleVolume(e, *guildID, -10)
-	case "vol_up":
-		p.handleVolume(e, *guildID, 10)
 	case "add":
 		p.handleAddModal(e)
 	case "queue":

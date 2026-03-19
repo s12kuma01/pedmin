@@ -43,7 +43,7 @@ func main() {
 	avatarModule := avatar.New(logger)
 	b.Register(avatarModule)
 
-	playerModule := player.New(b.Lavalink, logger)
+	playerModule := player.New(b.Lavalink, b.Client, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
 

@@ -2,7 +2,9 @@ package player
 
 import (
 	"log/slog"
+	"sync"
 
+	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/disgolink"
@@ -12,15 +14,23 @@ import (
 
 const ModuleID = "player"
 
+type trackedMessage struct {
+	channelID snowflake.ID
+	messageID snowflake.ID
+}
+
 type Player struct {
 	lavalink disgolink.Client
+	client   *disgobot.Client
 	queues   *QueueManager
+	messages sync.Map // map[snowflake.ID]trackedMessage
 	logger   *slog.Logger
 }
 
-func New(link disgolink.Client, logger *slog.Logger) *Player {
+func New(link disgolink.Client, client *disgobot.Client, logger *slog.Logger) *Player {
 	return &Player{
 		lavalink: link,
+		client:   client,
 		queues:   NewQueueManager(),
 		logger:   logger,
 	}
