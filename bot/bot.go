@@ -6,6 +6,7 @@ import (
 
 	"github.com/disgoorg/disgo"
 	disgobot "github.com/disgoorg/disgo/bot"
+	"github.com/disgoorg/disgo/cache"
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/snowflake/v2"
@@ -33,6 +34,9 @@ func New(cfg *config.Config, guildStore store.GuildStore, logger *slog.Logger) (
 	}
 
 	client, err := disgo.New(cfg.Token,
+		disgobot.WithCacheConfigOpts(
+			cache.WithCaches(cache.FlagVoiceStates),
+		),
 		disgobot.WithGatewayConfigOpts(
 			gateway.WithIntents(
 				gateway.IntentGuilds,
