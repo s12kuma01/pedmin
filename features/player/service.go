@@ -4,6 +4,7 @@ import (
 	"context"
 	"log/slog"
 	"strings"
+	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -11,6 +12,12 @@ import (
 	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
 )
+
+const lavalinkTimeout = 2 * time.Second
+
+func lavalinkCtx() (context.Context, context.CancelFunc) {
+	return context.WithTimeout(context.Background(), lavalinkTimeout)
+}
 
 func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	player := p.lavalink.ExistingPlayer(guildID)
@@ -22,12 +29,16 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 	queue := p.queues.Get(guildID)
 	next, ok := queue.Next()
 	if !ok {
-		_ = player.Update(context.TODO(), lavalink.WithNullTrack())
+		ctx, cancel := lavalinkCtx()
+		defer cancel()
+		_ = player.Update(ctx, lavalink.WithNullTrack())
 		p.respondWithPlayerUpdate(e, player, guildID)
 		return
 	}
 
-	if err := player.Update(context.TODO(), lavalink.WithTrack(next)); err != nil {
+	ctx, cancel := lavalinkCtx()
+	defer cancel()
+	if err := player.Update(ctx, lavalink.WithTrack(next)); err != nil {
 		p.logger.Error("failed to skip", slog.Any("error", err))
 	}
 	p.respondWithPlayerUpdate(e, player, guildID)
@@ -36,11 +47,13 @@ func (p *Player) handleSkip(e *events.ComponentInteractionCreate, guildID snowfl
 func (p *Player) handleStop(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
 	player := p.lavalink.ExistingPlayer(guildID)
 	if player != nil {
-		_ = player.Destroy(context.TODO())
+		ctx, cancel := lavalinkCtx()
+		_ = player.Destroy(ctx)
+		cancel()
 		p.lavalink.RemovePlayer(guildID)
 	}
 	p.queues.Delete(guildID)
-	_ = e.Client().UpdateVoiceState(context.TODO(), guildID, nil, false, false)
+	_ = e.Client().UpdateVoiceState(context.Background(), guildID, nil, false, false)
 
 	queue := p.queues.Get(guildID)
 	newPlayer := p.lavalink.Player(guildID)
@@ -67,7 +80,9 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 		return
 	}
 
-	node.LoadTracksHandler(context.TODO(), query, disgolink.NewResultHandler(
+	loadCtx, loadCancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer loadCancel()
+	node.LoadTracksHandler(loadCtx, query, disgolink.NewResultHandler(
 		func(track lavalink.Track) {
 			p.playTrack(e, guildID, track)
 		},
@@ -81,7 +96,9 @@ func (p *Player) loadAndPlay(e *events.ModalSubmitInteractionCreate, guildID sno
 
 			_ = p.joinVoiceChannel(e.Client(), guildID, e.Member().User.ID)
 			player := p.lavalink.Player(guildID)
-			_ = player.Update(context.TODO(), lavalink.WithTrack(playlist.Tracks[0]))
+			ctx, cancel := lavalinkCtx()
+			_ = player.Update(ctx, lavalink.WithTrack(playlist.Tracks[0]))
+			cancel()
 		},
 		func(tracks []lavalink.Track) {
 			if len(tracks) == 0 {
@@ -114,7 +131,9 @@ func (p *Player) playTrack(e *events.ModalSubmitInteractionCreate, guildID snowf
 		if !ok {
 			current = track
 		}
-		_ = player.Update(context.TODO(), lavalink.WithTrack(current))
+		ctx, cancel := lavalinkCtx()
+		_ = player.Update(ctx, lavalink.WithTrack(current))
+		cancel()
 	}
 }
 

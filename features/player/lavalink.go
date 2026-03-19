@@ -38,7 +38,9 @@ func (p *Player) onTrackEnd(player disgolink.Player, event lavalink.TrackEndEven
 		return
 	}
 
-	if err := player.Update(context.TODO(), lavalink.WithTrack(next)); err != nil {
+	ctx, cancel := lavalinkCtx()
+	defer cancel()
+	if err := player.Update(ctx, lavalink.WithTrack(next)); err != nil {
 		p.logger.Error("failed to play next track", slog.Any("error", err))
 	}
 }
@@ -60,7 +62,9 @@ func (p *Player) onTrackStuck(player disgolink.Player, event lavalink.TrackStuck
 	if !ok {
 		return
 	}
-	_ = player.Update(context.TODO(), lavalink.WithTrack(next))
+	ctx, cancel := lavalinkCtx()
+	defer cancel()
+	_ = player.Update(ctx, lavalink.WithTrack(next))
 }
 
 func (p *Player) onWebSocketClosed(_ disgolink.Player, event lavalink.WebSocketClosedEvent) {

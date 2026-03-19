@@ -1,6 +1,7 @@
 package player
 
 import (
+	"log/slog"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
@@ -10,10 +11,12 @@ import (
 
 func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
+	p.logger.Info("component interaction received", slog.String("custom_id", customID))
 	_, rest, _ := strings.Cut(customID, ":")
 
 	guildID := e.GuildID()
 	if guildID == nil {
+		p.logger.Warn("component interaction: guildID is nil")
 		return
 	}
 
