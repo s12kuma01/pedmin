@@ -11,6 +11,7 @@ import (
 	"github.com/s12kuma01/pedmin/bot"
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/features/avatar"
+	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	"github.com/s12kuma01/pedmin/features/settings"
 	"github.com/s12kuma01/pedmin/store"
@@ -43,6 +44,9 @@ func main() {
 
 	avatarModule := avatar.New(logger)
 	b.Register(avatarModule)
+
+	pingModule := ping.New(logger)
+	b.Register(pingModule)
 
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
