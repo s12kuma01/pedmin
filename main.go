@@ -9,6 +9,7 @@ import (
 
 	"github.com/s12kuma01/pedmin/bot"
 	"github.com/s12kuma01/pedmin/config"
+	"github.com/s12kuma01/pedmin/features/avatar"
 	"github.com/s12kuma01/pedmin/features/player"
 	"github.com/s12kuma01/pedmin/features/settings"
 	"github.com/s12kuma01/pedmin/store"
@@ -38,6 +39,9 @@ func main() {
 	// Register modules
 	settingsModule := settings.New(b, logger)
 	b.Register(settingsModule)
+
+	avatarModule := avatar.New(logger)
+	b.Register(avatarModule)
 
 	playerModule := player.New(b.Lavalink, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
