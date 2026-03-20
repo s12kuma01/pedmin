@@ -28,8 +28,8 @@ go.work.sum
 .env
 .claude
 
-# CUE config (may contain passwords)
-config.cue
+# TOML config (may contain passwords)
+config.toml
 
 # Runtime data
 data/

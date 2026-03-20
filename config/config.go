@@ -1,4 +1,4 @@
-// Package config loads application configuration from environment variables and CUE files.
+// Package config loads application configuration from environment variables and TOML files.
 package config
 
 import (
@@ -7,8 +7,7 @@ import (
 	"os"
 	"time"
 
-	"cuelang.org/go/cue"
-	"cuelang.org/go/cue/cuecontext"
+	"github.com/BurntSushi/toml"
 	"github.com/disgoorg/snowflake/v2"
 )
 
@@ -17,7 +16,7 @@ type Config struct {
 	Token string
 	AppID snowflake.ID
 
-	// CUE (app settings)
+	// TOML (app settings)
 	LavalinkHost     string
 	LavalinkPassword string
 	DataDir          string
@@ -66,146 +65,56 @@ func Load() (*Config, error) {
 
 	configPath := os.Getenv("CONFIG_PATH")
 	if configPath == "" {
-		configPath = "./config.cue"
+		configPath = "./config.toml"
 	}
 
-	data, err := os.ReadFile(configPath) // #nosec G304 G703 -- config path from trusted env var
-	if err != nil {
-		return nil, fmt.Errorf("failed to read config file %s: %w", configPath, err)
+	tc := defaultTOMLConfig()
+	if _, err := toml.DecodeFile(configPath, &tc); err != nil {
+		return nil, fmt.Errorf("failed to load config file %s: %w", configPath, err)
 	}
 
-	ctx := cuecontext.New()
-	value := ctx.CompileBytes(data)
-	if err := value.Validate(cue.Concrete(true)); err != nil {
-		return nil, fmt.Errorf("config validation failed: %w", err)
+	tc.fillDefaults()
+
+	if err := tc.validate(); err != nil {
+		return nil, err
+	}
+
+	allowedUsers := make([]snowflake.ID, len(tc.Panel.AllowedUsers))
+	for i, id := range tc.Panel.AllowedUsers {
+		allowedUsers[i] = snowflake.ID(id)
 	}
 
 	cfg := &Config{
-		Token: token,
-		AppID: appID,
-	}
+		Token:            token,
+		AppID:            appID,
+		LavalinkHost:     tc.Lavalink.Host,
+		LavalinkPassword: tc.Lavalink.Password,
+		DataDir:          tc.Storage.DataDir,
+		DBPath:           tc.Storage.DBPath,
+		DefaultVolume:    tc.Player.DefaultVolume,
+		AutoLeaveTimeout: time.Duration(tc.Player.AutoLeaveTimeout) * time.Second,
+		PresenceInterval: time.Duration(tc.Presence.Interval) * time.Second,
+		LogLevel:         parseSlogLevel(tc.LogLevel),
 
-	if err := lookupString(value, "lavalink.host", &cfg.LavalinkHost); err != nil {
-		return nil, err
-	}
-	if err := lookupString(value, "lavalink.password", &cfg.LavalinkPassword); err != nil {
-		return nil, err
-	}
-	if err := lookupString(value, "storage.dataDir", &cfg.DataDir); err != nil {
-		return nil, err
-	}
-	if err := lookupString(value, "storage.dbPath", &cfg.DBPath); err != nil {
-		return nil, err
-	}
+		LavalinkTimeout:         time.Duration(tc.Timeouts.Lavalink) * time.Second,
+		LavalinkLoadTimeout:     time.Duration(tc.Timeouts.LavalinkLoad) * time.Second,
+		HTTPClientTimeout:       time.Duration(tc.Timeouts.HTTPClient) * time.Second,
+		PanelPowerActionTimeout: time.Duration(tc.Timeouts.PanelPowerAction) * time.Second,
 
-	var defaultVolume int
-	if err := lookupInt(value, "player.defaultVolume", &defaultVolume); err != nil {
-		return nil, err
-	}
-	cfg.DefaultVolume = defaultVolume
+		RSSPollInterval: time.Duration(tc.RSS.PollInterval) * time.Second,
+		RSSFeedTimeout:  time.Duration(tc.RSS.FeedTimeout) * time.Second,
 
-	var autoLeaveSeconds int
-	if err := lookupInt(value, "player.autoLeaveTimeout", &autoLeaveSeconds); err != nil {
-		return nil, err
-	}
-	cfg.AutoLeaveTimeout = time.Duration(autoLeaveSeconds) * time.Second
+		XGDAPIKey:      os.Getenv("XGD_API_KEY"),
+		VTAPIKey:       os.Getenv("VT_API_KEY"),
+		ShortenTimeout: time.Duration(tc.URL.ShortenTimeout) * time.Second,
+		ScanTimeout:    time.Duration(tc.URL.ScanTimeout) * time.Second,
 
-	var presenceSeconds int
-	if err := lookupInt(value, "presence.interval", &presenceSeconds); err != nil {
-		return nil, err
+		PanelURL:          tc.Panel.URL,
+		PanelAPIKey:       os.Getenv("PANEL_API_KEY"),
+		PanelAllowedUsers: allowedUsers,
 	}
-	cfg.PresenceInterval = time.Duration(presenceSeconds) * time.Second
-
-	var logLevelStr string
-	if err := lookupString(value, "logLevel", &logLevelStr); err != nil {
-		return nil, err
-	}
-	cfg.LogLevel = parseSlogLevel(logLevelStr)
-
-	// Timeouts
-	var lavalinkTimeout, lavalinkLoadTimeout, httpClientTimeout, panelPowerActionTimeout int
-	if err := lookupInt(value, "timeouts.lavalink", &lavalinkTimeout); err != nil {
-		return nil, err
-	}
-	if err := lookupInt(value, "timeouts.lavalinkLoad", &lavalinkLoadTimeout); err != nil {
-		return nil, err
-	}
-	if err := lookupInt(value, "timeouts.httpClient", &httpClientTimeout); err != nil {
-		return nil, err
-	}
-	if err := lookupInt(value, "timeouts.panelPowerAction", &panelPowerActionTimeout); err != nil {
-		return nil, err
-	}
-	cfg.LavalinkTimeout = time.Duration(lavalinkTimeout) * time.Second
-	cfg.LavalinkLoadTimeout = time.Duration(lavalinkLoadTimeout) * time.Second
-	cfg.HTTPClientTimeout = time.Duration(httpClientTimeout) * time.Second
-	cfg.PanelPowerActionTimeout = time.Duration(panelPowerActionTimeout) * time.Second
-
-	// RSS
-	var rssPollInterval, rssFeedTimeout int
-	if err := lookupInt(value, "rss.pollInterval", &rssPollInterval); err != nil {
-		return nil, err
-	}
-	if err := lookupInt(value, "rss.feedTimeout", &rssFeedTimeout); err != nil {
-		return nil, err
-	}
-	cfg.RSSPollInterval = time.Duration(rssPollInterval) * time.Second
-	cfg.RSSFeedTimeout = time.Duration(rssFeedTimeout) * time.Second
-
-	// URL Tools (optional)
-	cfg.XGDAPIKey = os.Getenv("XGD_API_KEY")
-	cfg.VTAPIKey = os.Getenv("VT_API_KEY")
-	var shortenTimeout, scanTimeout int
-	if err := lookupInt(value, "url.shortenTimeout", &shortenTimeout); err != nil {
-		return nil, err
-	}
-	if err := lookupInt(value, "url.scanTimeout", &scanTimeout); err != nil {
-		return nil, err
-	}
-	cfg.ShortenTimeout = time.Duration(shortenTimeout) * time.Second
-	cfg.ScanTimeout = time.Duration(scanTimeout) * time.Second
-
-	// Panel (optional)
-	cfg.PanelAPIKey = os.Getenv("PANEL_API_KEY")
-	_ = lookupString(value, "panel.url", &cfg.PanelURL)
-	cfg.PanelAllowedUsers = lookupSnowflakeList(value, "panel.allowedUsers")
 
 	return cfg, nil
-}
-
-func lookupString(v cue.Value, path string, dst *string) error {
-	val := v.LookupPath(cue.ParsePath(path))
-	s, err := val.String()
-	if err != nil {
-		return fmt.Errorf("config %s: %w", path, err)
-	}
-	*dst = s
-	return nil
-}
-
-func lookupInt(v cue.Value, path string, dst *int) error {
-	val := v.LookupPath(cue.ParsePath(path))
-	n, err := val.Int64()
-	if err != nil {
-		return fmt.Errorf("config %s: %w", path, err)
-	}
-	*dst = int(n)
-	return nil
-}
-
-func lookupSnowflakeList(v cue.Value, path string) []snowflake.ID {
-	iter, err := v.LookupPath(cue.ParsePath(path)).List()
-	if err != nil {
-		return nil
-	}
-	var ids []snowflake.ID
-	for iter.Next() {
-		n, err := iter.Value().Int64()
-		if err == nil {
-			ids = append(ids, snowflake.ID(n))
-		}
-	}
-	return ids
 }
 
 func parseSlogLevel(s string) slog.Level {

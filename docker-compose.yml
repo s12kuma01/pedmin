@@ -33,6 +33,6 @@ services:
       - 8.8.4.4
     volumes:
       - ./data:/app/data
-      - ./config.cue:/app/config.cue:ro
+      - ./config.toml:/app/config.toml:ro
       - /sys/bus/pci:/sys/bus/pci:ro
       - /sys/devices:/sys/devices:ro

@@ -8,7 +8,7 @@ Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and 
 - **Lavalink Client**: disgolink v3.1.0
 - **Lavalink Server**: Lavalink 4 (Alpine)
 - **Data Storage**: SQLite (`modernc.org/sqlite`, pure Go), behind `GuildStore` interface
-- **Configuration**: Environment variables (secrets) + CUE file (app settings)
+- **Configuration**: Environment variables (secrets) + TOML file (app settings)
 
 ## Commands
 ```bash
@@ -33,7 +33,7 @@ Each feature is a self-contained module with internal layer separation (handler/
 
 ```
 main.go                        # Entrypoint: DI wiring, graceful shutdown
-config/config.go               # Env vars + CUE file loading
+config/config.go               # Env vars + TOML file loading
 module/module.go               # Module interface definition
 bot/
 ├── bot.go                     # Client init, module registry, lifecycle

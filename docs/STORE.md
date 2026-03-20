@@ -81,7 +81,7 @@ type RSSFeed struct {
 ```
 {DB_PATH}  (default: {DATA_DIR}/pedmin.db)
 ```
-Override with the `storage.dbPath` setting in `config.cue` or the `DB_PATH` environment variable.
+Override with the `storage.db_path` setting in `config.toml` or the `DB_PATH` environment variable.
 
 ### Schema
 
