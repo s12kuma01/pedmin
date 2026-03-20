@@ -25,13 +25,19 @@ func (l *Logger) handleComponent(e *events.ComponentInteractionCreate) {
 
 	switch action {
 	case "channel":
-		data := e.Data.(discord.ChannelSelectMenuInteractionData)
+		data, ok := e.Data.(discord.ChannelSelectMenuInteractionData)
+		if !ok {
+			return
+		}
 		if len(data.Values) > 0 {
 			settings.ChannelID = data.Values[0]
 		}
 
 	case "events":
-		data := e.Data.(discord.StringSelectMenuInteractionData)
+		data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+		if !ok {
+			return
+		}
 		for k := range settings.Events {
 			settings.Events[k] = false
 		}

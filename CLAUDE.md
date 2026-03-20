@@ -60,8 +60,8 @@ features/fuckfetch/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /fuckfetch command
 ├── service.go                 # System info gathering
-├── service_format.go          # Formatting helpers (bytes, bars, uptime)
-└── view.go                    # Neofetch-style output builder
+├── view.go                    # Neofetch-style output builder
+└── view_helpers.go            # Formatting helpers (bytes, bars, uptime)
 features/panel/
 ├── module.go                  # Info, Commands, permission check
 ├── handler_command.go         # /panel slash command
@@ -123,7 +123,8 @@ features/rss/
 ├── poller.go                  # Background polling routine
 ├── view_settings.go           # Settings panel (feed count)
 ├── view_manage.go             # Feed list/detail UI
-└── view_feed.go               # Feed item announcement builder
+├── view_feed.go               # Feed item announcement builder
+└── view_helpers.go            # Text utilities (stripHTML, truncate)
 ```
 
 ## Key Design Decisions

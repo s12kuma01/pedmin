@@ -2,13 +2,17 @@ package panel
 
 import (
 	"context"
-	"fmt"
 	"log/slog"
 	"strings"
 	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+)
+
+const (
+	defaultTimeout     = 10 * time.Second
+	powerActionTimeout = 15 * time.Second
 )
 
 func (p *Panel) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -42,15 +46,15 @@ func (p *Panel) HandleComponent(e *events.ComponentInteractionCreate) {
 }
 
 func (p *Panel) handleSelect(e *events.ComponentInteractionCreate) {
-	data := e.Data.(discord.StringSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	identifier := data.Values[0]
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	server, res, err := p.GetServerDetail(ctx, identifier)
@@ -66,7 +70,7 @@ func (p *Panel) handleSelect(e *events.ComponentInteractionCreate) {
 func (p *Panel) handlePower(e *events.ComponentInteractionCreate, identifier, signal string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), powerActionTimeout)
 	defer cancel()
 
 	server, res, err := p.PowerAction(ctx, identifier, signal)
@@ -82,7 +86,7 @@ func (p *Panel) handlePower(e *events.ComponentInteractionCreate, identifier, si
 func (p *Panel) handleRefresh(e *events.ComponentInteractionCreate, identifier string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	server, res, err := p.GetServerDetail(ctx, identifier)
@@ -98,7 +102,7 @@ func (p *Panel) handleRefresh(e *events.ComponentInteractionCreate, identifier s
 func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	servers, err := p.ListServersWithStatus(ctx)
@@ -113,17 +117,7 @@ func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
 }
 
 func (p *Panel) handleConsolePrompt(e *events.ComponentInteractionCreate, identifier string) {
-	_ = e.Modal(discord.ModalCreate{
-		CustomID: ModuleID + ":console_modal:" + identifier,
-		Title:    "コンソールコマンド",
-		Components: []discord.LayoutComponent{
-			discord.NewLabel("コマンド",
-				discord.NewShortTextInput(ModuleID+":cmd").
-					WithRequired(true).
-					WithPlaceholder("say hello"),
-			),
-		},
-	})
+	_ = e.Modal(BuildConsoleModal(identifier))
 }
 
 func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
@@ -148,22 +142,14 @@ func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferCreateMessage(true)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	if err := p.SendConsoleCommand(ctx, identifier, command); err != nil {
 		p.logger.Error("failed to send command", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay(fmt.Sprintf("コマンド送信に失敗しました:\n%s", err.Error())),
-			),
-		}))
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildConsoleError(err.Error()))
 		return
 	}
 
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("コマンドを送信しました: `%s`", command)),
-		),
-	}))
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildConsoleResult(command))
 }

@@ -3,17 +3,13 @@ package ticket
 import (
 	"strings"
 
-	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 )
 
 func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
-	parts := strings.SplitN(customID, ":", 3)
-	if len(parts) < 2 {
-		return
-	}
-	action := parts[1]
+	_, rest, _ := strings.Cut(customID, ":")
+	action, extra, _ := strings.Cut(rest, ":")
 
 	guildID := e.GuildID()
 	if guildID == nil {
@@ -36,34 +32,17 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 	case "deploy_channel":
 		t.handleDeployChannelSelect(e)
 	case "deploy_confirm":
-		if len(parts) < 3 {
+		if extra == "" {
 			return
 		}
-		t.handleDeployConfirm(e, parts[2])
+		t.handleDeployConfirm(e, extra)
 	case "deploy_cancel":
 		_ = e.DeferUpdateMessage()
 	case "create":
 		if !t.bot.IsModuleEnabled(*guildID, ModuleID) {
 			return
 		}
-		_ = e.Modal(discord.ModalCreate{
-			CustomID: ModuleID + ":create_modal",
-			Title:    "チケットを作成",
-			Components: []discord.LayoutComponent{
-				discord.NewLabel("件名",
-					discord.NewShortTextInput(ModuleID+":subject").
-						WithPlaceholder("チケットの件名を入力").
-						WithRequired(true).
-						WithMaxLength(100),
-				),
-				discord.NewLabel("説明",
-					discord.NewParagraphTextInput(ModuleID+":description").
-						WithPlaceholder("詳しい内容を入力してください").
-						WithRequired(false).
-						WithMaxLength(1000),
-				),
-			},
-		})
+		_ = e.Modal(BuildCreateTicketModal())
 	case "close":
 		t.archiveTicket(e, *guildID)
 	case "delete":

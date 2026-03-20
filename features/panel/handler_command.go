@@ -3,7 +3,6 @@ package panel
 import (
 	"context"
 	"log/slog"
-	"time"
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
@@ -24,7 +23,7 @@ func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 
 	_ = e.DeferCreateMessage(false)
 
-	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx, cancel := context.WithTimeout(context.Background(), defaultTimeout)
 	defer cancel()
 
 	servers, err := p.ListServersWithStatus(ctx)

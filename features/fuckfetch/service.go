@@ -107,15 +107,16 @@ func GatherSystemInfo() (*SystemInfo, error) {
 	}
 
 	// GPU
-	info.GPUInfo = gatherGPUInfo()
+	info.GPUInfo = gatherPCIDevices("VGA", "3D controller", "Display controller")
 
 	// NPU
-	info.NPUInfo = gatherNPUInfo()
+	info.NPUInfo = gatherPCIDevices("Processing accelerators", "accel")
 
 	return info, nil
 }
 
-func gatherGPUInfo() string {
+// gatherPCIDevices searches lspci output for lines matching any of the given keywords.
+func gatherPCIDevices(keywords ...string) string {
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	defer cancel()
 
@@ -124,39 +125,19 @@ func gatherGPUInfo() string {
 		return "N/A"
 	}
 
-	var gpus []string
+	var devices []string
 	for _, line := range strings.Split(string(out), "\n") {
-		if strings.Contains(line, "VGA") || strings.Contains(line, "3D controller") || strings.Contains(line, "Display controller") {
-			if idx := strings.Index(line, ": "); idx != -1 {
-				gpus = append(gpus, strings.TrimSpace(line[idx+2:]))
+		for _, kw := range keywords {
+			if strings.Contains(line, kw) {
+				if idx := strings.Index(line, ": "); idx != -1 {
+					devices = append(devices, strings.TrimSpace(line[idx+2:]))
+				}
+				break
 			}
 		}
 	}
-	if len(gpus) == 0 {
+	if len(devices) == 0 {
 		return "N/A"
 	}
-	return strings.Join(gpus, "\n")
-}
-
-func gatherNPUInfo() string {
-	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
-	defer cancel()
-
-	out, err := exec.CommandContext(ctx, "lspci").Output()
-	if err != nil {
-		return "N/A"
-	}
-
-	var npus []string
-	for _, line := range strings.Split(string(out), "\n") {
-		if strings.Contains(line, "Processing accelerators") || strings.Contains(line, "accel") {
-			if idx := strings.Index(line, ": "); idx != -1 {
-				npus = append(npus, strings.TrimSpace(line[idx+2:]))
-			}
-		}
-	}
-	if len(npus) == 0 {
-		return "N/A"
-	}
-	return strings.Join(npus, "\n")
+	return strings.Join(devices, "\n")
 }

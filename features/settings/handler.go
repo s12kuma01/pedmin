@@ -33,8 +33,8 @@ func (s *Settings) HandleComponent(e *events.ComponentInteractionCreate) {
 
 	switch {
 	case action == "select":
-		data := e.Data.(discord.StringSelectMenuInteractionData)
-		if len(data.Values) == 0 {
+		data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+		if !ok || len(data.Values) == 0 {
 			return
 		}
 		moduleID := data.Values[0]

@@ -6,9 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
-	"regexp"
-	"strings"
-
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/mmcdole/gofeed"
@@ -16,8 +13,6 @@ import (
 )
 
 const MaxFeedsPerGuild = 10
-
-var htmlTagRe = regexp.MustCompile(`<[^>]*>`)
 
 func (r *RSS) AddFeed(ctx context.Context, guildID snowflake.ID, channelID snowflake.ID, url string) (*store.RSSFeed, error) {
 	count, err := r.store.CountRSSFeeds(guildID)
@@ -107,18 +102,6 @@ func itemHash(item *gofeed.Item) string {
 	}
 	h := sha256.Sum256([]byte(key))
 	return fmt.Sprintf("%x", h)
-}
-
-func stripHTML(s string) string {
-	return strings.TrimSpace(htmlTagRe.ReplaceAllString(s, ""))
-}
-
-func truncate(s string, maxLen int) string {
-	runes := []rune(s)
-	if len(runes) <= maxLen {
-		return s
-	}
-	return string(runes[:maxLen]) + "..."
 }
 
 func ephemeralV2(components ...discord.LayoutComponent) discord.MessageCreate {

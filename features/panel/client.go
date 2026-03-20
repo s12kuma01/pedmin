@@ -48,14 +48,13 @@ type ServerLimits struct {
 }
 
 type Resources struct {
-	CurrentState     string
-	MemoryBytes      int64
-	MemoryLimitBytes int64
-	CPUAbsolute      float64
-	DiskBytes        int64
-	NetworkRxBytes   int64
-	NetworkTxBytes   int64
-	Uptime           int64 // milliseconds
+	CurrentState   string
+	MemoryBytes    int64
+	CPUAbsolute    float64
+	DiskBytes      int64
+	NetworkRxBytes int64
+	NetworkTxBytes int64
+	Uptime         int64 // milliseconds
 }
 
 func (c *PelicanClient) do(ctx context.Context, method, path string, body string) (*http.Response, error) {

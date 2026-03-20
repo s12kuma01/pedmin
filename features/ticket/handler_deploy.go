@@ -21,8 +21,8 @@ func (t *Ticket) handleDeployPrompt(e *events.ComponentInteractionCreate) {
 }
 
 func (t *Ticket) handleDeployChannelSelect(e *events.ComponentInteractionCreate) {
-	data := e.Data.(discord.ChannelSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.ChannelSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	channelID := data.Values[0]

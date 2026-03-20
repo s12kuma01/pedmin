@@ -9,8 +9,8 @@ import (
 )
 
 func (t *Ticket) handleCategorySelect(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	data := e.Data.(discord.ChannelSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.ChannelSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	if err := t.UpdateCategory(guildID, data.Values[0]); err != nil {
@@ -32,8 +32,8 @@ func (t *Ticket) handleLogPrompt(e *events.ComponentInteractionCreate) {
 }
 
 func (t *Ticket) handleLogChannelSelect(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	data := e.Data.(discord.ChannelSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.ChannelSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	if err := t.UpdateLogChannel(guildID, data.Values[0]); err != nil {
@@ -54,8 +54,8 @@ func (t *Ticket) handleRolePrompt(e *events.ComponentInteractionCreate) {
 }
 
 func (t *Ticket) handleRoleSelect(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
-	data := e.Data.(discord.RoleSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.RoleSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	if err := t.UpdateSupportRole(guildID, data.Values[0]); err != nil {

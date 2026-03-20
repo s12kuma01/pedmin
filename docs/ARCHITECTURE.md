@@ -86,8 +86,8 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 | `module.go` | Module | Info, Commands |
 | `handler_command.go` | Handler | `/fuckfetch` command |
 | `service.go` | Service | System info gathering (CPU, RAM, Disk, GPU, NPU) |
-| `service_format.go` | Service | Formatting helpers (bytes, bars, uptime) |
 | `view.go` | View | Neofetch-style output builder |
+| `view_helpers.go` | View | Formatting helpers (bytes, bars, uptime) |
 
 ### features/panel/
 | File | Layer | Responsibility |
@@ -175,6 +175,7 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 | `view_settings.go` | View | Settings panel (feed count) |
 | `view_manage.go` | View | Feed list/detail UI, error container |
 | `view_feed.go` | View | Feed item announcement builder |
+| `view_helpers.go` | View | Text utilities (stripHTML, truncate) |
 
 ## Data Flow
 

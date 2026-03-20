@@ -62,8 +62,8 @@ func (r *RSS) handleAddChannel(e *events.ComponentInteractionCreate, encodedURL 
 		return
 	}
 
-	data := e.Data.(discord.ChannelSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.ChannelSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 	channelID := data.Values[0]
@@ -101,8 +101,8 @@ func (r *RSS) handleManage(e *events.ComponentInteractionCreate) {
 }
 
 func (r *RSS) handleManageSelect(e *events.ComponentInteractionCreate) {
-	data := e.Data.(discord.StringSelectMenuInteractionData)
-	if len(data.Values) == 0 {
+	data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
 		return
 	}
 
