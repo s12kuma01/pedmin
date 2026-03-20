@@ -114,12 +114,12 @@ func (c *PelicanClient) ListServers(ctx context.Context) ([]Server, error) {
 	var result struct {
 		Data []struct {
 			Attributes struct {
-				Identifier  string `json:"identifier"`
-				Name        string `json:"name"`
-				Description string `json:"description"`
+				Identifier  string  `json:"identifier"`
+				Name        string  `json:"name"`
+				Description string  `json:"description"`
 				Status      *string `json:"status"`
-				Node        string `json:"node"`
-				IsSuspended bool   `json:"is_suspended"`
+				Node        string  `json:"node"`
+				IsSuspended bool    `json:"is_suspended"`
 				Limits      struct {
 					Memory int `json:"memory"`
 					Disk   int `json:"disk"`
@@ -169,12 +169,12 @@ func (c *PelicanClient) GetResources(ctx context.Context, identifier string) (*R
 		Attributes struct {
 			CurrentState string `json:"current_state"`
 			Resources    struct {
-				MemoryBytes      int64   `json:"memory_bytes"`
-				CPUAbsolute      float64 `json:"cpu_absolute"`
-				DiskBytes        int64   `json:"disk_bytes"`
-				NetworkRxBytes   int64   `json:"network_rx_bytes"`
-				NetworkTxBytes   int64   `json:"network_tx_bytes"`
-				Uptime           int64   `json:"uptime"`
+				MemoryBytes    int64   `json:"memory_bytes"`
+				CPUAbsolute    float64 `json:"cpu_absolute"`
+				DiskBytes      int64   `json:"disk_bytes"`
+				NetworkRxBytes int64   `json:"network_rx_bytes"`
+				NetworkTxBytes int64   `json:"network_tx_bytes"`
+				Uptime         int64   `json:"uptime"`
 			} `json:"resources"`
 		} `json:"attributes"`
 	}
@@ -192,39 +192,4 @@ func (c *PelicanClient) GetResources(ctx context.Context, identifier string) (*R
 		NetworkTxBytes: result.Attributes.Resources.NetworkTxBytes,
 		Uptime:         result.Attributes.Resources.Uptime,
 	}, nil
-}
-
-// SendPowerAction sends a power signal (start, stop, restart, kill).
-func (c *PelicanClient) SendPowerAction(ctx context.Context, identifier, signal string) error {
-	body := fmt.Sprintf(`{"signal":"%s"}`, signal)
-	resp, err := c.do(ctx, http.MethodPost, "/api/client/servers/"+identifier+"/power", body)
-	if err != nil {
-		return err
-	}
-	_ = resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-	return nil
-}
-
-// SendCommand sends a console command to a server.
-func (c *PelicanClient) SendCommand(ctx context.Context, identifier, command string) error {
-	body := fmt.Sprintf(`{"command":%s}`, jsonString(command))
-	resp, err := c.do(ctx, http.MethodPost, "/api/client/servers/"+identifier+"/command", body)
-	if err != nil {
-		return err
-	}
-	_ = resp.Body.Close()
-
-	if resp.StatusCode != http.StatusNoContent {
-		return fmt.Errorf("unexpected status code: %d", resp.StatusCode)
-	}
-	return nil
-}
-
-func jsonString(s string) string {
-	b, _ := json.Marshal(s)
-	return string(b)
 }

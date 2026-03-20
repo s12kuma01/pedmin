@@ -9,21 +9,6 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-func (s *Settings) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
-	guildID := e.GuildID()
-	if guildID == nil {
-		_ = e.CreateMessage(ephemeralV2(
-			discord.NewContainer(
-				discord.NewTextDisplay("設定はサーバー内でのみ使用できます。"),
-			),
-		))
-		return
-	}
-
-	options := s.listModuleOptions(*guildID)
-	_ = e.CreateMessage(BuildMainPanel(options))
-}
-
 func (s *Settings) HandleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	_, action, _ := strings.Cut(customID, ":")
