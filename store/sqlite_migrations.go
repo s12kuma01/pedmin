@@ -90,12 +90,12 @@ func (s *SQLiteStore) migrate() error {
 		}
 
 		if _, err := tx.Exec(m.sql); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return fmt.Errorf("failed to execute migration %d: %w", m.version, err)
 		}
 
 		if _, err := tx.Exec("INSERT INTO schema_migrations (version) VALUES (?)", m.version); err != nil {
-			tx.Rollback()
+			_ = tx.Rollback()
 			return fmt.Errorf("failed to record migration %d: %w", m.version, err)
 		}
 

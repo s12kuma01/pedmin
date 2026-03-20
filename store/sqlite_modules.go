@@ -19,7 +19,7 @@ func (s *SQLiteStore) Get(guildID snowflake.ID) (*GuildSettings, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query guild modules: %w", err)
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 
 	for rows.Next() {
 		var moduleID string
@@ -37,7 +37,7 @@ func (s *SQLiteStore) Get(guildID snowflake.ID) (*GuildSettings, error) {
 	if err != nil {
 		return nil, fmt.Errorf("failed to query guild module settings: %w", err)
 	}
-	defer settingsRows.Close()
+	defer func() { _ = settingsRows.Close() }()
 
 	for settingsRows.Next() {
 		var moduleID string
@@ -63,7 +63,7 @@ func (s *SQLiteStore) Save(settings *GuildSettings) error {
 	if err != nil {
 		return fmt.Errorf("failed to begin transaction: %w", err)
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	gid := int64(settings.GuildID)
 

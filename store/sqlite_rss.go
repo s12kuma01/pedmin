@@ -35,7 +35,7 @@ func (s *SQLiteStore) GetRSSFeeds(guildID snowflake.ID) ([]RSSFeed, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return scanRSSFeeds(rows)
 }
 
@@ -44,7 +44,7 @@ func (s *SQLiteStore) GetAllRSSFeeds() ([]RSSFeed, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }()
 	return scanRSSFeeds(rows)
 }
 
@@ -89,13 +89,13 @@ func (s *SQLiteStore) MarkItemsSeen(feedID int64, itemHashes []string) error {
 	if err != nil {
 		return err
 	}
-	defer tx.Rollback()
+	defer func() { _ = tx.Rollback() }()
 
 	stmt, err := tx.Prepare("INSERT OR IGNORE INTO rss_seen_items (feed_id, item_hash) VALUES (?, ?)")
 	if err != nil {
 		return err
 	}
-	defer stmt.Close()
+	defer func() { _ = stmt.Close() }()
 
 	for _, h := range itemHashes {
 		if _, err := stmt.Exec(feedID, h); err != nil {

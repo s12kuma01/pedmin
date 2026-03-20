@@ -48,7 +48,7 @@ func (c *URLClient) ShortenURL(ctx context.Context, rawURL string) (string, erro
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
@@ -112,7 +112,7 @@ func (c *URLClient) vtGetReport(ctx context.Context, urlID string) (*VTResult, e
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode == http.StatusNotFound {
 		return nil, fmt.Errorf("not found")
@@ -165,7 +165,7 @@ func (c *URLClient) vtSubmitURL(ctx context.Context, rawURL string) (string, err
 	if err != nil {
 		return "", err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		respBody, _ := io.ReadAll(resp.Body)
