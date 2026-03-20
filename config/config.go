@@ -26,6 +26,11 @@ type Config struct {
 	AutoLeaveTimeout time.Duration
 	PresenceInterval time.Duration
 	LogLevel         slog.Level
+
+	// Panel (Pelican)
+	PanelURL          string
+	PanelAPIKey       string
+	PanelAllowedUsers []snowflake.ID
 }
 
 func Load() (*Config, error) {
@@ -101,6 +106,11 @@ func Load() (*Config, error) {
 	}
 	cfg.LogLevel = parseSlogLevel(logLevelStr)
 
+	// Panel (optional)
+	cfg.PanelAPIKey = os.Getenv("PANEL_API_KEY")
+	_ = lookupString(value, "panel.url", &cfg.PanelURL)
+	cfg.PanelAllowedUsers = lookupSnowflakeList(value, "panel.allowedUsers")
+
 	return cfg, nil
 }
 
@@ -122,6 +132,21 @@ func lookupInt(v cue.Value, path string, dst *int) error {
 	}
 	*dst = int(n)
 	return nil
+}
+
+func lookupSnowflakeList(v cue.Value, path string) []snowflake.ID {
+	iter, err := v.LookupPath(cue.ParsePath(path)).List()
+	if err != nil {
+		return nil
+	}
+	var ids []snowflake.ID
+	for iter.Next() {
+		n, err := iter.Value().Int64()
+		if err == nil {
+			ids = append(ids, snowflake.ID(n))
+		}
+	}
+	return ids
 }
 
 func parseSlogLevel(s string) slog.Level {

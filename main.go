@@ -13,6 +13,7 @@ import (
 	"github.com/s12kuma01/pedmin/features/avatar"
 	"github.com/s12kuma01/pedmin/features/fuckfetch"
 	loggermod "github.com/s12kuma01/pedmin/features/logger"
+	panelmod "github.com/s12kuma01/pedmin/features/panel"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	rssmod "github.com/s12kuma01/pedmin/features/rss"
@@ -63,6 +64,9 @@ func main() {
 
 	rssModule := rssmod.New(b, b.Client, guildStore, logger)
 	b.Register(rssModule)
+
+	panelModule := panelmod.New(cfg, logger)
+	b.Register(panelModule)
 
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
