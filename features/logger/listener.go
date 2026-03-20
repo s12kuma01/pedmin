@@ -55,11 +55,11 @@ func (l *Logger) onMessageUpdate(e *events.GuildMessageUpdate) {
 	}
 	oldContent := e.OldMessage.Content
 	newContent := e.Message.Content
-	if oldContent == newContent {
+	if oldContent == newContent && AttachmentsEqual(e.OldMessage.Attachments, e.Message.Attachments) {
 		return
 	}
 	l.sendLog(e.GuildID, EventMessageEdit,
-		BuildMessageEditLog(e.Message.Author, e.ChannelID, oldContent, newContent),
+		BuildMessageEditLog(e.Message.Author, e.ChannelID, oldContent, newContent, e.OldMessage.Attachments, e.Message.Attachments),
 	)
 }
 
@@ -73,7 +73,7 @@ func (l *Logger) onMessageDelete(e *events.GuildMessageDelete) {
 		return
 	}
 	l.sendLog(e.GuildID, EventMessageDelete,
-		BuildMessageDeleteLog(user, e.ChannelID, content),
+		BuildMessageDeleteLog(user, e.ChannelID, content, e.Message.Attachments),
 	)
 }
 
