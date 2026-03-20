@@ -42,6 +42,14 @@ func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 		return
 	}
 
+	// Fetch actual status from /resources for each server
+	for i := range servers {
+		res, err := p.pelican.GetResources(ctx, servers[i].Identifier)
+		if err == nil {
+			servers[i].Status = res.CurrentState
+		}
+	}
+
 	msg := BuildServerList(servers)
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components))
 }

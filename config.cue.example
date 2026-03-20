@@ -18,3 +18,8 @@ presence: {
 }
 
 logLevel: *"info" | "debug" | "warn" | "error"
+
+panel: {
+	url:          *"" | string
+	allowedUsers: [...int] | *[]
+}

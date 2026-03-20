@@ -105,6 +105,13 @@ func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
 		return
 	}
 
+	for i := range servers {
+		res, err := p.pelican.GetResources(ctx, servers[i].Identifier)
+		if err == nil {
+			servers[i].Status = res.CurrentState
+		}
+	}
+
 	msg := BuildServerList(servers)
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components))
 }

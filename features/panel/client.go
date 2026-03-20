@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"strings"
 	"time"
@@ -85,16 +86,19 @@ func (c *PelicanClient) do(ctx context.Context, method, path string, body string
 		return nil, err
 	}
 
-	switch resp.StatusCode {
-	case 401, 403:
+	if resp.StatusCode >= 400 {
+		body, _ := io.ReadAll(resp.Body)
 		resp.Body.Close()
-		return nil, ErrUnauthorized
-	case 404:
-		resp.Body.Close()
-		return nil, ErrNotFound
-	case 429:
-		resp.Body.Close()
-		return nil, ErrRateLimited
+		switch resp.StatusCode {
+		case 401, 403:
+			return nil, fmt.Errorf("unauthorized (status %d): %s", resp.StatusCode, string(body))
+		case 404:
+			return nil, ErrNotFound
+		case 429:
+			return nil, ErrRateLimited
+		default:
+			return nil, fmt.Errorf("API error (status %d): %s", resp.StatusCode, string(body))
+		}
 	}
 
 	return resp, nil
