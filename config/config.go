@@ -31,6 +31,10 @@ type Config struct {
 	PanelURL          string
 	PanelAPIKey       string
 	PanelAllowedUsers []snowflake.ID
+
+	// URL Tools
+	XGDAPIKey string
+	VTAPIKey  string
 }
 
 func Load() (*Config, error) {
@@ -105,6 +109,10 @@ func Load() (*Config, error) {
 		return nil, err
 	}
 	cfg.LogLevel = parseSlogLevel(logLevelStr)
+
+	// URL Tools (optional)
+	cfg.XGDAPIKey = os.Getenv("XGD_API_KEY")
+	cfg.VTAPIKey = os.Getenv("VT_API_KEY")
 
 	// Panel (optional)
 	cfg.PanelAPIKey = os.Getenv("PANEL_API_KEY")

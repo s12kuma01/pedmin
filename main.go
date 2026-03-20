@@ -14,6 +14,7 @@ import (
 	"github.com/s12kuma01/pedmin/features/fuckfetch"
 	loggermod "github.com/s12kuma01/pedmin/features/logger"
 	panelmod "github.com/s12kuma01/pedmin/features/panel"
+	urlmod "github.com/s12kuma01/pedmin/features/url"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	rssmod "github.com/s12kuma01/pedmin/features/rss"
@@ -67,6 +68,9 @@ func main() {
 
 	panelModule := panelmod.New(cfg, logger)
 	b.Register(panelModule)
+
+	urlModule := urlmod.New(cfg, logger)
+	b.Register(urlModule)
 
 	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
