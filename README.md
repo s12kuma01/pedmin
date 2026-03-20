@@ -5,10 +5,15 @@ Pedmin (pepe + administrator) is a modular Discord bot built with Go and [disgo]
 ## Features
 
 - **Feature Module System** - Each feature is a self-contained module (handler/service/view layers)
-- **Settings Panel** - `/settings` command with interactive admin UI
-- **Music Player** - `/player` with Lavalink-powered playback, queue management, and rich V2 UI
+- **Settings Panel** - `/settings` command with interactive admin UI, per-guild module toggle
+- **Music Player** - `/player` with Lavalink-powered playback, queue management, loop modes, and rich V2 UI
+- **Support Tickets** - Channel-based ticket system with creation panel, close/reopen, and transcript logging
+- **Server Logger** - Configurable event logging (message edit/delete with attachment support, member join/leave, ban/unban, role/channel changes)
+- **RSS Feeds** - Background RSS feed monitoring with automatic announcements
+- **Avatar Viewer** - `/avatar` command with server/global avatar display via MediaGallery
+- **System Info** - `/fuckfetch` neofetch-style system information display
 - **Components V2** - Modern Discord UI with containers, sections, and interactive controls
-- **SQLite Storage** - Per-guild settings with WAL mode for concurrent access
+- **SQLite Storage** - Per-guild settings and data with WAL mode for concurrent access
 
 ## Quick Start
 

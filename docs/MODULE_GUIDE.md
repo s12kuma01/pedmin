@@ -77,7 +77,7 @@ func (m *MyFeature) HandleCommand(e *events.ApplicationCommandInteractionCreate)
     _ = e.CreateMessage(discord.NewMessageCreateV2(
         discord.NewContainer(
             discord.NewTextDisplay("Hello from my module!"),
-        ).WithAccentColor(0x00B894),
+        ),
     ))
 }
 
@@ -122,7 +122,7 @@ func (m *MyFeature) doSomething(guildID snowflake.ID) string {
 func buildResultUI(result string) discord.ContainerComponent {
     return discord.NewContainer(
         discord.NewTextDisplay(result),
-    ).WithAccentColor(0x00B894)
+    )
 }
 ```
 

@@ -5,11 +5,12 @@
 ### Layout Components (top-level, used in messages/modals)
 | Type | Constructor | Use |
 |------|------------|-----|
-| `ContainerComponent` | `discord.NewContainer(subs...)` | Groups components, has accent color |
+| `ContainerComponent` | `discord.NewContainer(subs...)` | Groups components |
 | `ActionRowComponent` | `discord.NewActionRow(comps...)` | Holds buttons/selects (max 5) |
 | `TextDisplayComponent` | `discord.NewTextDisplay(content)` | Markdown text block |
 | `SectionComponent` | `discord.NewSection(subs...)` | Groups text with an accessory |
 | `SeparatorComponent` | `discord.NewLargeSeparator()` / `discord.NewSmallSeparator()` | Visual divider |
+| `MediaGalleryComponent` | `discord.NewMediaGallery(items...)` | Image gallery display |
 | `LabelComponent` | `discord.NewLabel(label, comp)` | Labels for modals (V2) |
 
 ### Interactive Components (inside ActionRow)
@@ -33,6 +34,12 @@ discord.NewLinkButton(label, url)           // Gray with link icon
 | `ThumbnailComponent` | `discord.NewThumbnail(url)` | Small image |
 | `ButtonComponent` | (same as above) | Button accessory |
 
+### Media Components
+| Type | Constructor | Use |
+|------|------------|-----|
+| `MediaGalleryItem` | struct with `Media` field | Single media item in gallery |
+| `UnfurledMediaItem` | struct with `URL` field | Media URL reference |
+
 ## Creating V2 Messages
 
 ### New Message
@@ -45,7 +52,7 @@ msg := discord.NewMessageCreateV2(
         discord.NewActionRow(
             discord.NewPrimaryButton("Click me", "mymod:action"),
         ),
-    ).WithAccentColor(0x00B894),
+    ),
 )
 ```
 
@@ -59,9 +66,26 @@ msg := discord.NewMessageCreateV2(components...).WithEphemeral(true)
 update := discord.NewMessageUpdateV2([]discord.LayoutComponent{
     discord.NewContainer(
         discord.NewTextDisplay("Updated content"),
-    ).WithAccentColor(0x00B894),
+    ),
 })
 ```
+
+## MediaGallery
+
+Display images using `MediaGallery` with `MediaGalleryItem`:
+
+```go
+discord.NewMediaGallery(
+    discord.MediaGalleryItem{
+        Media: discord.UnfurledMediaItem{URL: "https://cdn.example.com/image.png"},
+    },
+    discord.MediaGalleryItem{
+        Media: discord.UnfurledMediaItem{URL: "https://cdn.example.com/image2.png"},
+    },
+)
+```
+
+Used in the avatar module for avatar display and in the logger module for attachment logging.
 
 ## Responding to Interactions
 
@@ -112,10 +136,16 @@ _ = e.Modal(discord.ModalCreate{
 Container with select menu for module list, detail view with toggle button and back button.
 
 ### Media Player (player)
-Container with accent color reflecting state (green/yellow/gray), Section with track info + thumbnail, progress bar text, two ActionRows for controls.
+Container with Section for track info + thumbnail, progress bar text, two ActionRows for controls.
 
 ### List View (queue)
 Container with numbered track list as TextDisplay, navigation buttons.
+
+### Log Messages (logger)
+Container with title, separator, body text. Image attachments displayed via MediaGallery, non-image files listed as text.
+
+### Avatar Display (avatar)
+Container with MediaGallery showing server and/or global avatar.
 
 ## Section with Accessory
 ```go

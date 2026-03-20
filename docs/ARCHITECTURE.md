@@ -56,14 +56,17 @@ main
  │    ├── module   (interface only)
  │    └── store    (interface only)
  └── features/
-      ├── settings
-      │    └── module
-      └── player
-           ├── module
-           └── disgolink
+      ├── settings   → module
+      ├── ping       → module
+      ├── avatar     → module
+      ├── fuckfetch  → module
+      ├── player     → module, disgolink
+      ├── ticket     → module, store
+      ├── logger     → module, store
+      └── rss        → module, store
 ```
 
-Dependencies flow downward. Features never depend on each other. The `settings` module accesses bot functionality through a local interface (Go implicit interface), avoiding direct `bot` package imports.
+Dependencies flow downward. Features never depend on each other. Modules that need bot functionality (settings, ticket, logger, rss) define a local `Bot` interface with only the methods they need, avoiding direct `bot` package imports.
 
 ## File Responsibilities (1 File = 1 Concern)
 
@@ -75,6 +78,7 @@ Dependencies flow downward. Features never depend on each other. The `settings` 
 | `router.go` | Interaction dispatch to modules |
 | `ui.go` | Shared UI helpers (error messages) |
 | `voice.go` | VoiceState/VoiceServer event relay to Lavalink |
+| `presence.go` | Bot presence updater (CPU/RAM monitoring) |
 
 ### features/player/
 | File | Layer | Responsibility |
@@ -89,6 +93,7 @@ Dependencies flow downward. Features never depend on each other. The `settings` 
 | `queue_manager.go` | Domain | Per-guild queue management |
 | `loop_mode.go` | Domain | LoopMode type definition |
 | `lavalink.go` | Infra | Lavalink event listeners, node connection |
+| `auto_leave.go` | Service | Auto-leave on empty VC |
 | `view_player.go` | View | Player UI builder |
 | `view_queue.go` | View | Queue list UI builder |
 | `view_helpers.go` | View | Progress bar, duration format, thumbnails |
@@ -99,6 +104,40 @@ Dependencies flow downward. Features never depend on each other. The `settings` 
 | `module.go` | Module | Info, Commands, Bot interface, empty stubs |
 | `handler.go` | Handler | Command/component routing |
 | `view.go` | View | Main panel, module panel builders |
+
+### features/ticket/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Bot/Client/Store deps |
+| `handler_component.go` | Handler | Create/close/reopen ticket buttons |
+| `handler_modal.go` | Handler | Ticket creation modal |
+| `service.go` | Service | Ticket creation/closure logic |
+| `settings.go` | Domain | Settings struct & persistence |
+| `view_panel.go` | View | Ticket control panel UI |
+| `view_ticket.go` | View | Ticket channel message UI |
+| `view_log.go` | View | Ticket list/log UI |
+
+### features/logger/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Bot/Client/Store deps |
+| `listener.go` | Handler | Event listeners (messages, members, bans, roles, channels) |
+| `handler.go` | Handler | Component interaction handling |
+| `settings.go` | Domain | Logger settings (channel ID, event toggles) |
+| `view_settings.go` | View | Settings UI |
+| `view_log.go` | View | Log message builders (text, attachments, MediaGallery) |
+
+### features/rss/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Bot/Client/Store deps |
+| `handler_component.go` | Handler | Add/remove feed UI |
+| `handler_modal.go` | Handler | Feed URL input modal |
+| `service.go` | Service | Feed fetch & post logic |
+| `poller.go` | Infra | Background polling routine |
+| `view_settings.go` | View | Settings panel (feed count) |
+| `view_manage.go` | View | Add/remove feed UI |
+| `view_feed.go` | View | Feed item announcement builder |
 
 ## Data Flow
 
@@ -136,24 +175,27 @@ Dependencies flow downward. Features never depend on each other. The `settings` 
 7. lavalink.go: onTrackEnd → service.go: play next
 ```
 
+### Event Listeners (Logger)
+```
+1. User deletes a message
+2. Discord Gateway → disgo
+3. listener.go: onMessageDelete()
+4. Check module enabled, load settings
+5. view_log.go: BuildMessageDeleteLog() with text + attachments
+6. Send log to configured channel
+```
+
 ## Components V2 Design
 
-All UI uses Discord Components V2 (`discord.NewMessageCreateV2()`). No embeds.
+All UI uses Discord Components V2 (`discord.NewMessageCreateV2()`). No embeds. No accent colors on containers.
 
 ### Layout Hierarchy
 ```
 MessageCreate (V2 flag)
- └── ContainerComponent (accent color)
+ └── ContainerComponent
       ├── TextDisplayComponent (markdown)
       ├── SeparatorComponent (divider)
+      ├── MediaGalleryComponent (images)
       ├── SectionComponent (text + thumbnail/button accessory)
       └── ActionRowComponent (buttons, select menus)
 ```
-
-### Color Conventions
-| State | Color | Hex |
-|-------|-------|-----|
-| Playing | Green | `#00B894` |
-| Paused | Yellow | `#FDCB6E` |
-| Idle | Gray | `#636E72` |
-| Error | Red | `#FF0000` |
