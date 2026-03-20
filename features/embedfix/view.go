@@ -12,7 +12,7 @@ func BuildTweetEmbed(tweet *Tweet, ref tweetRef) discord.MessageCreate {
 }
 
 func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref tweetRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("𝕏 · %s · %sから翻訳", relativeTime(tweet.CreatedAt), langName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), langName(result.DetectedLanguage))
 	components := buildTweetComponents(tweet, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
@@ -20,7 +20,7 @@ func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref tweetR
 func buildTweetComponents(tweet *Tweet, ref tweetRef, text, footerOverride string) []discord.ContainerSubComponent {
 	components := []discord.ContainerSubComponent{
 		discord.NewSection(
-			discord.NewTextDisplay(fmt.Sprintf("**%s** @%s", tweet.Author.Name, tweet.Author.ScreenName)),
+			discord.NewTextDisplay(fmt.Sprintf("**%s** [@%s](https://x.com/%s)", tweet.Author.Name, tweet.Author.ScreenName, tweet.Author.ScreenName)),
 		).WithAccessory(discord.NewThumbnail(tweet.Author.AvatarURL)),
 		discord.NewSmallSeparator(),
 		discord.NewTextDisplay(text),
@@ -50,7 +50,7 @@ func buildTweetComponents(tweet *Tweet, ref tweetRef, text, footerOverride strin
 	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("𝕏 · %s", relativeTime(tweet.CreatedAt))
+	footer := fmt.Sprintf("%s | <t:%d:f>", emojiX, tweet.CreatedAt.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}

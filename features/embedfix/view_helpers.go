@@ -3,7 +3,6 @@ package embedfix
 import (
 	"fmt"
 	"regexp"
-	"time"
 )
 
 // Application Emoji (registered in Developer Portal)
@@ -12,6 +11,7 @@ const (
 	emojiRepost   = "<:repost:1484573523929469079>"
 	emojiLike     = "<:like:1484573534490595419>"
 	emojiGraph    = "<:graph:1484573514571714712>"
+	emojiX        = "<:x_:1484598038508081293>"
 )
 
 var tweetURLRegex = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
@@ -33,28 +33,6 @@ func extractTweetURLs(content string) []tweetRef {
 		})
 	}
 	return refs
-}
-
-func relativeTime(t time.Time) string {
-	if t.IsZero() {
-		return ""
-	}
-
-	d := time.Since(t)
-	switch {
-	case d < time.Minute:
-		return "たった今"
-	case d < time.Hour:
-		return fmt.Sprintf("%d分前", int(d.Minutes()))
-	case d < 24*time.Hour:
-		return fmt.Sprintf("%d時間前", int(d.Hours()))
-	case d < 30*24*time.Hour:
-		return fmt.Sprintf("%d日前", int(d.Hours()/24))
-	case d < 365*24*time.Hour:
-		return fmt.Sprintf("%dヶ月前", int(d.Hours()/(24*30)))
-	default:
-		return fmt.Sprintf("%d年前", int(d.Hours()/(24*365)))
-	}
 }
 
 func formatCount(n int) string {
