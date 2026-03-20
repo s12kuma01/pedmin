@@ -41,6 +41,12 @@ func BuildManagePanel(feeds []store.RSSFeed) discord.MessageCreate {
 	)
 }
 
+func errorContainer(text string) discord.ContainerComponent {
+	return discord.NewContainer(
+		discord.NewTextDisplay(text),
+	)
+}
+
 func BuildFeedDetail(feed store.RSSFeed) discord.MessageUpdate {
 	title := feed.Title
 	if title == "" {

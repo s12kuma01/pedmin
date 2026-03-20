@@ -13,14 +13,8 @@ func (t *Ticket) handleCategorySelect(e *events.ComponentInteractionCreate, guil
 	if len(data.Values) == 0 {
 		return
 	}
-	settings, err := LoadSettings(t.store, guildID)
-	if err != nil {
-		t.logger.Error("failed to load settings", slog.Any("error", err))
-		return
-	}
-	settings.CategoryID = data.Values[0]
-	if err := SaveSettings(t.store, guildID, settings); err != nil {
-		t.logger.Error("failed to save settings", slog.Any("error", err))
+	if err := t.UpdateCategory(guildID, data.Values[0]); err != nil {
+		t.logger.Error("failed to update category", slog.Any("error", err))
 	}
 	_ = e.DeferUpdateMessage()
 }
@@ -42,14 +36,8 @@ func (t *Ticket) handleLogChannelSelect(e *events.ComponentInteractionCreate, gu
 	if len(data.Values) == 0 {
 		return
 	}
-	settings, err := LoadSettings(t.store, guildID)
-	if err != nil {
-		t.logger.Error("failed to load settings", slog.Any("error", err))
-		return
-	}
-	settings.LogChannelID = data.Values[0]
-	if err := SaveSettings(t.store, guildID, settings); err != nil {
-		t.logger.Error("failed to save settings", slog.Any("error", err))
+	if err := t.UpdateLogChannel(guildID, data.Values[0]); err != nil {
+		t.logger.Error("failed to update log channel", slog.Any("error", err))
 	}
 	_ = e.DeferUpdateMessage()
 }
@@ -70,14 +58,8 @@ func (t *Ticket) handleRoleSelect(e *events.ComponentInteractionCreate, guildID 
 	if len(data.Values) == 0 {
 		return
 	}
-	settings, err := LoadSettings(t.store, guildID)
-	if err != nil {
-		t.logger.Error("failed to load settings", slog.Any("error", err))
-		return
-	}
-	settings.SupportRoleID = data.Values[0]
-	if err := SaveSettings(t.store, guildID, settings); err != nil {
-		t.logger.Error("failed to save settings", slog.Any("error", err))
+	if err := t.UpdateSupportRole(guildID, data.Values[0]); err != nil {
+		t.logger.Error("failed to update support role", slog.Any("error", err))
 	}
 	_ = e.DeferUpdateMessage()
 }

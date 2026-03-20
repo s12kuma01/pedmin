@@ -90,7 +90,7 @@ func (r *RSS) handleAddChannel(e *events.ComponentInteractionCreate, encodedURL 
 }
 
 func (r *RSS) handleManage(e *events.ComponentInteractionCreate) {
-	feeds, err := r.store.GetRSSFeeds(*e.GuildID())
+	feeds, err := r.GetFeeds(*e.GuildID())
 	if err != nil {
 		r.logger.Error("failed to get feeds", slog.Any("error", err))
 		_ = e.CreateMessage(ephemeralV2(errorContainer("フィード一覧の取得に失敗しました。")))
@@ -111,22 +111,16 @@ func (r *RSS) handleManageSelect(e *events.ComponentInteractionCreate) {
 		return
 	}
 
-	feeds, err := r.store.GetRSSFeeds(*e.GuildID())
+	feed, err := r.GetFeed(*e.GuildID(), feedID)
 	if err != nil {
-		r.logger.Error("failed to get feeds", slog.Any("error", err))
+		r.logger.Error("failed to get feed", slog.Any("error", err))
+		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
+			errorContainer("フィードが見つかりませんでした。"),
+		}))
 		return
 	}
 
-	for _, f := range feeds {
-		if f.ID == feedID {
-			_ = e.UpdateMessage(BuildFeedDetail(f))
-			return
-		}
-	}
-
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		errorContainer("フィードが見つかりませんでした。"),
-	}))
+	_ = e.UpdateMessage(BuildFeedDetail(*feed))
 }
 
 func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr string) {
@@ -135,16 +129,10 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 		return
 	}
 
-	if err := r.RemoveFeed(feedID, *e.GuildID()); err != nil {
+	feeds, err := r.DeleteFeedAndList(feedID, *e.GuildID())
+	if err != nil {
 		r.logger.Error("failed to delete feed", slog.Any("error", err))
 		_ = e.CreateMessage(ephemeralV2(errorContainer("フィードの削除に失敗しました。")))
-		return
-	}
-
-	feeds, err := r.store.GetRSSFeeds(*e.GuildID())
-	if err != nil {
-		r.logger.Error("failed to get feeds after delete", slog.Any("error", err))
-		_ = e.DeferUpdateMessage()
 		return
 	}
 
@@ -159,10 +147,4 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 
 	msg := BuildManagePanel(feeds)
 	_ = e.UpdateMessage(discord.NewMessageUpdateV2(msg.Components))
-}
-
-func errorContainer(text string) discord.ContainerComponent {
-	return discord.NewContainer(
-		discord.NewTextDisplay(text),
-	)
 }

@@ -80,6 +80,26 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 | `voice.go` | VoiceState/VoiceServer event relay to Lavalink |
 | `presence.go` | Bot presence updater (CPU/RAM monitoring) |
 
+### features/fuckfetch/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Commands |
+| `handler_command.go` | Handler | `/fuckfetch` command |
+| `service.go` | Service | System info gathering (CPU, RAM, Disk, GPU, NPU) |
+| `service_format.go` | Service | Formatting helpers (bytes, bars, uptime) |
+| `view.go` | View | Neofetch-style output builder |
+
+### features/panel/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Commands, permission check |
+| `handler_command.go` | Handler | `/panel` slash command |
+| `handler_component.go` | Handler | Button/select dispatch + modal handling |
+| `service.go` | Service | Server list/detail/power/console operations |
+| `client.go` | Infra | Pelican API HTTP client |
+| `view_panel.go` | View | Server list, detail, error panels |
+| `view_helpers.go` | View | Format helpers (bytes, bars, uptime, emoji) |
+
 ### features/player/
 | File | Layer | Responsibility |
 |------|-------|---------------|
@@ -110,12 +130,28 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 |------|-------|---------------|
 | `module.go` | Module | Info, Bot/Client/Store deps |
 | `handler_component.go` | Handler | Create/close/reopen ticket buttons |
+| `handler_settings.go` | Handler | Settings UI interactions (category, log channel, role) |
 | `handler_modal.go` | Handler | Ticket creation modal |
-| `service.go` | Service | Ticket creation/closure logic |
+| `handler_deploy.go` | Handler | Panel deployment |
+| `service.go` | Service | Ticket creation/closure/settings logic |
+| `service_log.go` | Service | Log & transcript sending |
 | `settings.go` | Domain | Settings struct & persistence |
+| `transcript.go` | Service | HTML transcript generation |
+| `view_settings.go` | View | Settings panel UI |
 | `view_panel.go` | View | Ticket control panel UI |
 | `view_ticket.go` | View | Ticket channel message UI |
 | `view_log.go` | View | Ticket list/log UI |
+
+### features/url/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Commands |
+| `handler_command.go` | Handler | `/url` command |
+| `handler_component.go` | Handler | Button dispatch (shorten/check/back) |
+| `handler_modal.go` | Handler | Modal submission (shorten/check) |
+| `service.go` | Service | URL validation, shorten, scan |
+| `client.go` | Infra | x.gd + VirusTotal HTTP clients |
+| `view.go` | View | Main panel, result, error panels |
 
 ### features/logger/
 | File | Layer | Responsibility |
@@ -131,12 +167,13 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 | File | Layer | Responsibility |
 |------|-------|---------------|
 | `module.go` | Module | Info, Bot/Client/Store deps |
-| `handler_component.go` | Handler | Add/remove feed UI |
+| `handler_component.go` | Handler | Add/remove feed dispatch |
 | `handler_modal.go` | Handler | Feed URL input modal |
-| `service.go` | Service | Feed fetch & post logic |
+| `service.go` | Service | Feed CRUD, validation, post logic |
+| `service_poll.go` | Service | Single feed poll logic |
 | `poller.go` | Infra | Background polling routine |
 | `view_settings.go` | View | Settings panel (feed count) |
-| `view_manage.go` | View | Add/remove feed UI |
+| `view_manage.go` | View | Feed list/detail UI, error container |
 | `view_feed.go` | View | Feed item announcement builder |
 
 ## Data Flow

@@ -12,15 +12,7 @@ import (
 func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	userID := e.User().ID
 
-	// Check allowed users
-	allowed := false
-	for _, id := range p.cfg.PanelAllowedUsers {
-		if id == userID {
-			allowed = true
-			break
-		}
-	}
-	if !allowed {
+	if !p.isAllowed(userID) {
 		_ = e.CreateMessage(ephemeralError("このコマンドを使用する権限がありません。"))
 		return
 	}
@@ -35,19 +27,11 @@ func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	servers, err := p.pelican.ListServers(ctx)
+	servers, err := p.ListServersWithStatus(ctx)
 	if err != nil {
 		p.logger.Error("failed to list servers", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
 		return
-	}
-
-	// Fetch actual status from /resources for each server
-	for i := range servers {
-		res, err := p.pelican.GetResources(ctx, servers[i].Identifier)
-		if err == nil {
-			servers[i].Status = res.CurrentState
-		}
 	}
 
 	msg := BuildServerList(servers)

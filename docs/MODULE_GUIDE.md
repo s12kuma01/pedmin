@@ -98,10 +98,18 @@ b.Register(myModule)
 | Layer | File pattern | Does | Does NOT |
 |-------|-------------|------|----------|
 | **Module** | `module.go` | Define struct, Info, Commands, stubs | Contain logic |
-| **Handler** | `handler*.go` | Parse interaction, call service, build response | Contain business logic |
-| **Service** | `service.go` | Pure logic, state changes | Import `discord`/`events` |
-| **View** | `view*.go` | Build Components V2 UI | Have side effects |
+| **Handler** | `handler*.go` | Parse interaction, call service, build response | Contain business logic, API calls, or store access |
+| **Service** | `service*.go` | Business logic, API calls, store operations | Build Discord UI components |
+| **View** | `view*.go` | Build Components V2 UI (pure functions: data in → components out) | Have side effects, call APIs, or access store |
+| **Client** | `client.go` | External API HTTP wrappers | Contain business logic |
 | **Domain** | `queue.go` etc. | Data structures, types | Import Discord packages |
+
+### Layer Rules
+
+1. **Handlers are dispatchers only.** A handler method should: defer the interaction → call service → call view → respond. No business logic, no direct API calls, no store access.
+2. **Services own all logic.** Any operation that involves validation, state changes, external API calls, or store reads/writes belongs in `service*.go`.
+3. **Views are pure functions.** They take data as input and return Discord components as output. No side effects.
+4. **Clients are HTTP wrappers.** They translate Go method calls to HTTP requests and responses. No business logic.
 
 ### Handler → Service → View flow
 
@@ -113,7 +121,7 @@ func (m *MyFeature) HandleComponent(e *events.ComponentInteractionCreate) {
     _ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}))
 }
 
-// service.go: pure logic, no Discord types
+// service.go: logic + store/API access
 func (m *MyFeature) doSomething(guildID snowflake.ID) string {
     return "result"
 }

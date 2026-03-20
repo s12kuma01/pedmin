@@ -73,6 +73,33 @@ func (r *RSS) RemoveFeed(feedID int64, guildID snowflake.ID) error {
 	return r.store.DeleteRSSFeed(feedID, guildID)
 }
 
+// GetFeeds returns all RSS feeds for a guild.
+func (r *RSS) GetFeeds(guildID snowflake.ID) ([]store.RSSFeed, error) {
+	return r.store.GetRSSFeeds(guildID)
+}
+
+// GetFeed returns a single feed by ID within a guild.
+func (r *RSS) GetFeed(guildID snowflake.ID, feedID int64) (*store.RSSFeed, error) {
+	feeds, err := r.store.GetRSSFeeds(guildID)
+	if err != nil {
+		return nil, err
+	}
+	for _, f := range feeds {
+		if f.ID == feedID {
+			return &f, nil
+		}
+	}
+	return nil, fmt.Errorf("feed not found")
+}
+
+// DeleteFeedAndList deletes a feed and returns the remaining feed list.
+func (r *RSS) DeleteFeedAndList(feedID int64, guildID snowflake.ID) ([]store.RSSFeed, error) {
+	if err := r.RemoveFeed(feedID, guildID); err != nil {
+		return nil, err
+	}
+	return r.GetFeeds(guildID)
+}
+
 func itemHash(item *gofeed.Item) string {
 	key := item.GUID
 	if key == "" {

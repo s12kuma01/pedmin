@@ -59,8 +59,17 @@ features/avatar/
 features/fuckfetch/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /fuckfetch command
-├── sysinfo.go                 # System info gathering
-└── view_fuckfetch.go          # Neofetch-style output builder
+├── service.go                 # System info gathering
+├── service_format.go          # Formatting helpers (bytes, bars, uptime)
+└── view.go                    # Neofetch-style output builder
+features/panel/
+├── module.go                  # Info, Commands, permission check
+├── handler_command.go         # /panel slash command
+├── handler_component.go       # Button/select dispatch + modal handling
+├── service.go                 # Server list/detail/power/console operations
+├── client.go                  # Pelican API HTTP client
+├── view_panel.go              # Server list, detail, error panels
+└── view_helpers.go            # Format helpers (bytes, bars, uptime, emoji)
 features/player/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /player slash command
@@ -76,12 +85,25 @@ features/player/
 ├── view_player.go             # Player UI builder
 ├── view_queue.go              # Queue UI builder
 └── view_helpers.go            # Progress bar, duration format, thumbnails
+features/url/
+├── module.go                  # Info, Commands
+├── handler_command.go         # /url command
+├── handler_component.go       # Button dispatch (shorten/check/back)
+├── handler_modal.go           # Modal submission (shorten/check)
+├── service.go                 # URL validation, shorten, scan
+├── client.go                  # x.gd + VirusTotal HTTP clients
+└── view.go                    # Main panel, result, error panels
 features/ticket/
 ├── module.go                  # Info, Commands, Bot/Client/Store deps
 ├── handler_component.go       # Create/close/reopen ticket buttons
+├── handler_settings.go        # Settings UI interactions
 ├── handler_modal.go           # Ticket creation modal
-├── service.go                 # Ticket creation/closure logic
+├── handler_deploy.go          # Panel deployment
+├── service.go                 # Ticket creation/closure/settings logic
+├── service_log.go             # Log & transcript sending
+├── transcript.go              # HTML transcript generation
 ├── settings.go                # Settings struct & persistence
+├── view_settings.go           # Settings panel UI
 ├── view_panel.go              # Ticket control panel UI
 ├── view_ticket.go             # Ticket channel message UI
 └── view_log.go                # Ticket list/log UI
@@ -94,12 +116,13 @@ features/logger/
 └── view_log.go                # Log message builders (text, attachments, MediaGallery)
 features/rss/
 ├── module.go                  # Info, Bot/Client/Store deps
-├── handler_component.go       # Add/remove feed UI
+├── handler_component.go       # Add/remove feed dispatch
 ├── handler_modal.go           # Feed URL input modal
-├── service.go                 # Feed fetch & post logic
+├── service.go                 # Feed CRUD, validation, post logic
+├── service_poll.go            # Single feed poll logic
 ├── poller.go                  # Background polling routine
 ├── view_settings.go           # Settings panel (feed count)
-├── view_manage.go             # Add/remove feed UI
+├── view_manage.go             # Feed list/detail UI
 └── view_feed.go               # Feed item announcement builder
 ```
 

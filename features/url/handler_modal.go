@@ -3,7 +3,6 @@ package url
 import (
 	"context"
 	"log/slog"
-	"net/url"
 	"strings"
 	"time"
 
@@ -37,7 +36,7 @@ func (u *URL) handleShortenModal(e *events.ModalSubmitInteractionCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	shortURL, err := u.client.ShortenURL(ctx, rawURL)
+	shortURL, err := u.Shorten(ctx, rawURL)
 	if err != nil {
 		u.logger.Error("failed to shorten URL", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
@@ -64,7 +63,7 @@ func (u *URL) handleCheckModal(e *events.ModalSubmitInteractionCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	result, err := u.client.ScanURL(ctx, rawURL)
+	result, err := u.Check(ctx, rawURL)
 	if err != nil {
 		u.logger.Error("failed to scan URL", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
@@ -74,12 +73,4 @@ func (u *URL) handleCheckModal(e *events.ModalSubmitInteractionCreate) {
 
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(),
 		BuildCheckResult(rawURL, result))
-}
-
-func isValidURL(rawURL string) bool {
-	u, err := url.Parse(rawURL)
-	if err != nil {
-		return false
-	}
-	return u.Scheme == "http" || u.Scheme == "https"
 }

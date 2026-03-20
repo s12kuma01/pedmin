@@ -2,6 +2,7 @@ package panel
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strings"
 	"time"
@@ -52,16 +53,9 @@ func (p *Panel) handleSelect(e *events.ComponentInteractionCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	server, err := p.findServer(ctx, identifier)
+	server, res, err := p.GetServerDetail(ctx, identifier)
 	if err != nil {
-		p.logger.Error("failed to find server", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
-		return
-	}
-
-	res, err := p.pelican.GetResources(ctx, identifier)
-	if err != nil {
-		p.logger.Error("failed to get resources", slog.Any("error", err))
+		p.logger.Error("failed to get server detail", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
 		return
 	}
@@ -75,21 +69,30 @@ func (p *Panel) handlePower(e *events.ComponentInteractionCreate, identifier, si
 	ctx, cancel := context.WithTimeout(context.Background(), 15*time.Second)
 	defer cancel()
 
-	if err := p.pelican.SendPowerAction(ctx, identifier, signal); err != nil {
+	server, res, err := p.PowerAction(ctx, identifier, signal)
+	if err != nil {
 		p.logger.Error("failed to send power action", slog.String("signal", signal), slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
 		return
 	}
 
-	// Wait for state transition
-	time.Sleep(2 * time.Second)
-
-	p.refreshDetail(e, identifier)
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildServerDetail(*server, res))
 }
 
 func (p *Panel) handleRefresh(e *events.ComponentInteractionCreate, identifier string) {
 	_ = e.DeferUpdateMessage()
-	p.refreshDetail(e, identifier)
+
+	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+	defer cancel()
+
+	server, res, err := p.GetServerDetail(ctx, identifier)
+	if err != nil {
+		p.logger.Error("failed to refresh server detail", slog.Any("error", err))
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
+		return
+	}
+
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildServerDetail(*server, res))
 }
 
 func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
@@ -98,18 +101,11 @@ func (p *Panel) handleBack(e *events.ComponentInteractionCreate) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	servers, err := p.pelican.ListServers(ctx)
+	servers, err := p.ListServersWithStatus(ctx)
 	if err != nil {
 		p.logger.Error("failed to list servers", slog.Any("error", err))
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
 		return
-	}
-
-	for i := range servers {
-		res, err := p.pelican.GetResources(ctx, servers[i].Identifier)
-		if err == nil {
-			servers[i].Status = res.CurrentState
-		}
 	}
 
 	msg := BuildServerList(servers)
@@ -130,36 +126,44 @@ func (p *Panel) handleConsolePrompt(e *events.ComponentInteractionCreate, identi
 	})
 }
 
-func (p *Panel) refreshDetail(e *events.ComponentInteractionCreate, identifier string) {
+func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
+	if !p.isAllowed(e.User().ID) {
+		_ = e.CreateMessage(ephemeralError("このコマンドを使用する権限がありません。"))
+		return
+	}
+
+	customID := e.Data.CustomID
+	_, rest, _ := strings.Cut(customID, ":")
+	action, identifier, _ := strings.Cut(rest, ":")
+
+	if action != "console_modal" {
+		return
+	}
+
+	command := strings.TrimSpace(e.Data.Text(ModuleID + ":cmd"))
+	if command == "" {
+		_ = e.CreateMessage(ephemeralError("コマンドを入力してください。"))
+		return
+	}
+
+	_ = e.DeferCreateMessage(true)
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	server, err := p.findServer(ctx, identifier)
-	if err != nil {
-		p.logger.Error("failed to find server", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
+	if err := p.SendConsoleCommand(ctx, identifier, command); err != nil {
+		p.logger.Error("failed to send command", slog.Any("error", err))
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
+			discord.NewContainer(
+				discord.NewTextDisplay(fmt.Sprintf("コマンド送信に失敗しました:\n%s", err.Error())),
+			),
+		}))
 		return
 	}
 
-	res, err := p.pelican.GetResources(ctx, identifier)
-	if err != nil {
-		p.logger.Error("failed to get resources", slog.Any("error", err))
-		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildErrorPanel(err.Error()))
-		return
-	}
-
-	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), BuildServerDetail(*server, res))
-}
-
-func (p *Panel) findServer(ctx context.Context, identifier string) (*Server, error) {
-	servers, err := p.pelican.ListServers(ctx)
-	if err != nil {
-		return nil, err
-	}
-	for _, s := range servers {
-		if s.Identifier == identifier {
-			return &s, nil
-		}
-	}
-	return nil, ErrNotFound
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		discord.NewContainer(
+			discord.NewTextDisplay(fmt.Sprintf("コマンドを送信しました: `%s`", command)),
+		),
+	}))
 }
