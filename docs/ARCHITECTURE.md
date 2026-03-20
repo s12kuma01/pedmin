@@ -118,12 +118,19 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 | `view_queue.go` | View | Queue list UI builder |
 | `view_helpers.go` | View | Progress bar, duration format, thumbnails |
 
+### features/ping/
+| File | Layer | Responsibility |
+|------|-------|---------------|
+| `module.go` | Module | Info, Commands, empty stubs |
+| `handler_command.go` | Handler | `/ping` command |
+| `view.go` | View | Ping response UI builder |
+
 ### features/settings/
 | File | Layer | Responsibility |
 |------|-------|---------------|
 | `module.go` | Module | Info, Commands, Bot interface, empty stubs |
-| `handler.go` | Handler | Command/component routing |
-| `view.go` | View | Main panel, module panel builders |
+| `handler.go` | Handler | Command/component routing, module data preparation |
+| `view.go` | View | Main panel, module panel builders (pure functions) |
 
 ### features/ticket/
 | File | Layer | Responsibility |

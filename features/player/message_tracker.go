@@ -20,7 +20,10 @@ func (p *Player) deleteTrackedMessage(guildID snowflake.ID) {
 	if !ok {
 		return
 	}
-	tracked := val.(trackedMessage)
+	tracked, ok := val.(trackedMessage)
+	if !ok {
+		return
+	}
 	if err := p.client.Rest.DeleteMessage(tracked.channelID, tracked.messageID); err != nil {
 		p.logger.Warn("failed to delete tracked message", slog.Any("error", err))
 	}
@@ -32,7 +35,10 @@ func (p *Player) updatePlayerMessage(player disgolink.Player) {
 	if !ok {
 		return
 	}
-	tracked := val.(trackedMessage)
+	tracked, ok := val.(trackedMessage)
+	if !ok {
+		return
+	}
 
 	queue := p.queues.Get(guildID)
 	ui := BuildPlayerUI(player, queue)

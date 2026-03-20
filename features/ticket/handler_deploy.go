@@ -26,15 +26,7 @@ func (t *Ticket) handleDeployChannelSelect(e *events.ComponentInteractionCreate)
 		return
 	}
 	channelID := data.Values[0]
-	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(
-			discord.NewTextDisplay("パネルを設置するチャンネル: <#"+channelID.String()+">"),
-			discord.NewActionRow(
-				discord.NewSuccessButton("設置する", ModuleID+":deploy_confirm:"+channelID.String()),
-				discord.NewSecondaryButton("キャンセル", ModuleID+":deploy_cancel"),
-			),
-		),
-	}))
+	_ = e.UpdateMessage(BuildDeployConfirm(channelID))
 }
 
 func (t *Ticket) handleDeployConfirm(e *events.ComponentInteractionCreate, channelIDStr string) {

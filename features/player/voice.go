@@ -15,5 +15,5 @@ func (p *Player) joinVoiceChannel(client *disgobot.Client, guildID, userID snowf
 	if !ok || voiceState.ChannelID == nil {
 		return errNotInVoiceChannel
 	}
-	return client.UpdateVoiceState(context.TODO(), guildID, voiceState.ChannelID, false, true)
+	return client.UpdateVoiceState(context.Background(), guildID, voiceState.ChannelID, false, true)
 }

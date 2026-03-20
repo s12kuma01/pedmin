@@ -21,7 +21,13 @@ func (qm *QueueManager) Get(guildID snowflake.ID) *Queue {
 		qm.queues.Store(guildID, q)
 		return q
 	}
-	return v.(*Queue)
+	q, ok := v.(*Queue)
+	if !ok {
+		q = NewQueue()
+		qm.queues.Store(guildID, q)
+		return q
+	}
+	return q
 }
 
 func (qm *QueueManager) Delete(guildID snowflake.ID) {

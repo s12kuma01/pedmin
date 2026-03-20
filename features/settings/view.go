@@ -4,33 +4,38 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/module"
 )
 
-func (s *Settings) mainPanel(guildID snowflake.ID) discord.MessageCreate {
-	return ephemeralV2(s.buildMainContainer(guildID))
+// ModuleOption holds display data for a module in the settings panel.
+type ModuleOption struct {
+	ID          string
+	Name        string
+	Description string
+	Enabled     bool
 }
 
-func (s *Settings) mainPanelUpdate(guildID snowflake.ID) discord.MessageUpdate {
-	return discord.NewMessageUpdateV2([]discord.LayoutComponent{s.buildMainContainer(guildID)})
+// BuildMainPanel builds the initial settings panel message.
+func BuildMainPanel(options []ModuleOption) discord.MessageCreate {
+	return ephemeralV2(buildMainContainer(options))
 }
 
-func (s *Settings) buildMainContainer(guildID snowflake.ID) discord.ContainerComponent {
-	modules := s.bot.GetModules()
-	var options []discord.StringSelectMenuOption
-	for _, m := range modules {
-		info := m.Info()
-		if info.AlwaysOn {
-			continue
-		}
+// BuildMainPanelUpdate builds the settings panel as a message update.
+func BuildMainPanelUpdate(options []ModuleOption) discord.MessageUpdate {
+	return discord.NewMessageUpdateV2([]discord.LayoutComponent{buildMainContainer(options)})
+}
+
+func buildMainContainer(options []ModuleOption) discord.ContainerComponent {
+	var selectOptions []discord.StringSelectMenuOption
+	for _, opt := range options {
 		status := "❌"
-		if s.bot.IsModuleEnabled(guildID, info.ID) {
+		if opt.Enabled {
 			status = "✅"
 		}
-		options = append(options, discord.StringSelectMenuOption{
-			Label:       fmt.Sprintf("%s %s", status, info.Name),
-			Value:       info.ID,
-			Description: info.Description,
+		selectOptions = append(selectOptions, discord.StringSelectMenuOption{
+			Label:       fmt.Sprintf("%s %s", status, opt.Name),
+			Value:       opt.ID,
+			Description: opt.Description,
 		})
 	}
 
@@ -39,11 +44,11 @@ func (s *Settings) buildMainContainer(guildID snowflake.ID) discord.ContainerCom
 		discord.NewLargeSeparator(),
 	}
 
-	if len(options) > 0 {
+	if len(selectOptions) > 0 {
 		components = append(components,
 			discord.NewTextDisplay("設定するモジュールを選択してください:"),
 			discord.NewActionRow(
-				discord.NewStringSelectMenu(ModuleID+":select", "モジュールを選択...", options...),
+				discord.NewStringSelectMenu(ModuleID+":select", "モジュールを選択...", selectOptions...),
 			),
 		)
 	} else {
@@ -55,20 +60,8 @@ func (s *Settings) buildMainContainer(guildID snowflake.ID) discord.ContainerCom
 	return discord.NewContainer(components...)
 }
 
-func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.MessageUpdate {
-	modules := s.bot.GetModules()
-	m, ok := modules[moduleID]
-	if !ok {
-		return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-			discord.NewContainer(
-				discord.NewTextDisplay("モジュールが見つかりません。"),
-			),
-		})
-	}
-
-	info := m.Info()
-	enabled := s.bot.IsModuleEnabled(guildID, moduleID)
-
+// BuildModulePanel builds the module detail panel as a message update.
+func BuildModulePanel(info module.Info, enabled bool, settingsPanel []discord.LayoutComponent) discord.MessageUpdate {
 	statusText := "無効"
 	toggleLabel := "有効にする"
 	toggleStyle := discord.ButtonStyleSuccess
@@ -85,7 +78,6 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 		discord.NewTextDisplay(fmt.Sprintf("**ステータス:** %s", statusText)),
 	}
 
-	settingsPanel := m.SettingsPanel(guildID)
 	if len(settingsPanel) > 0 {
 		components = append(components, discord.NewLargeSeparator())
 		for _, lc := range settingsPanel {
@@ -98,13 +90,22 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 	components = append(components,
 		discord.NewLargeSeparator(),
 		discord.NewActionRow(
-			discord.NewButton(toggleStyle, toggleLabel, fmt.Sprintf("%s:toggle:%s", ModuleID, moduleID), "", 0),
+			discord.NewButton(toggleStyle, toggleLabel, fmt.Sprintf("%s:toggle:%s", ModuleID, info.ID), "", 0),
 			discord.NewSecondaryButton("← 戻る", ModuleID+":back"),
 		),
 	)
 
 	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
 		discord.NewContainer(components...),
+	})
+}
+
+// BuildModuleNotFound builds an error panel when a module is not found.
+func BuildModuleNotFound() discord.MessageUpdate {
+	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		discord.NewContainer(
+			discord.NewTextDisplay("モジュールが見つかりません。"),
+		),
 	})
 }
 

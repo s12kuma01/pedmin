@@ -54,7 +54,10 @@ func (p *Player) startAutoLeaveTimer(guildID snowflake.ID) {
 
 		val, ok := p.messages.Load(guildID)
 		if ok {
-			tracked := val.(trackedMessage)
+			tracked, ok := val.(trackedMessage)
+			if !ok {
+				return
+			}
 			newPlayer := p.lavalink.Player(guildID)
 			queue := p.queues.Get(guildID)
 			ui := BuildPlayerUI(newPlayer, queue)
@@ -73,6 +76,9 @@ func (p *Player) cancelAutoLeaveTimer(guildID snowflake.ID) {
 	if !ok {
 		return
 	}
-	timer := val.(*time.Timer)
+	timer, ok := val.(*time.Timer)
+	if !ok {
+		return
+	}
 	timer.Stop()
 }

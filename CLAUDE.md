@@ -51,7 +51,8 @@ features/settings/
 └── view.go                    # UI builders (mainPanel, modulePanel)
 features/ping/
 ├── module.go                  # Info, Commands
-└── handler_command.go         # /ping latency response
+├── handler_command.go         # /ping command
+└── view.go                    # Ping response UI builder
 features/avatar/
 ├── module.go                  # Info, Commands
 ├── handler_command.go         # /avatar command, user resolve

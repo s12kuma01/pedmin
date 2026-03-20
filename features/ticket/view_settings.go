@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/snowflake/v2"
 )
 
 func BuildSettingsPanel(settings *TicketSettings) []discord.LayoutComponent {
@@ -41,4 +42,17 @@ func BuildSettingsPanel(settings *TicketSettings) []discord.LayoutComponent {
 		categorySelect,
 		buttons,
 	}
+}
+
+// BuildDeployConfirm builds the deploy confirmation panel.
+func BuildDeployConfirm(channelID snowflake.ID) discord.MessageUpdate {
+	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		discord.NewContainer(
+			discord.NewTextDisplay("パネルを設置するチャンネル: <#"+channelID.String()+">"),
+			discord.NewActionRow(
+				discord.NewSuccessButton("設置する", ModuleID+":deploy_confirm:"+channelID.String()),
+				discord.NewSecondaryButton("キャンセル", ModuleID+":deploy_cancel"),
+			),
+		),
+	})
 }
