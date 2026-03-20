@@ -110,7 +110,7 @@ func (c *PelicanClient) ListServers(ctx context.Context) ([]Server, error) {
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result struct {
 		Data []struct {
@@ -164,7 +164,7 @@ func (c *PelicanClient) GetResources(ctx context.Context, identifier string) (*R
 	if err != nil {
 		return nil, err
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	var result struct {
 		Attributes struct {
