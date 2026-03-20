@@ -27,6 +27,7 @@ go.work.sum
 # env file
 .env
 .claude
+.material
 
 # TOML config (may contain passwords)
 config.toml
