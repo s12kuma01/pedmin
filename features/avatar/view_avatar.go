@@ -7,8 +7,6 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-const accentColor = 0x5865F2
-
 func BuildAvatarUI(user discord.User, member *discord.ResolvedMember, guildID *snowflake.ID) discord.ContainerComponent {
 	cdnOpts := []discord.CDNOpt{
 		discord.WithFormat(discord.FileFormatPNG),
@@ -50,5 +48,5 @@ func BuildAvatarUI(user discord.User, member *discord.ResolvedMember, guildID *s
 		)
 	}
 
-	return discord.NewContainer(components...).WithAccentColor(accentColor)
+	return discord.NewContainer(components...)
 }

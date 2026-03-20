@@ -31,7 +31,7 @@ func (t *Ticket) handleModal(e *events.ModalSubmitInteractionCreate) {
 		_ = e.CreateMessage(discord.NewMessageCreateV2(
 			discord.NewContainer(
 				discord.NewTextDisplay("件名を入力してください。"),
-			).WithAccentColor(0xFF0000),
+			),
 		).WithEphemeral(true))
 		return
 	}
@@ -44,7 +44,7 @@ func (t *Ticket) handleModal(e *events.ModalSubmitInteractionCreate) {
 		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
 			discord.NewContainer(
 				discord.NewTextDisplay("チケットの作成に失敗しました。"),
-			).WithAccentColor(0xFF0000),
+			),
 		}))
 		return
 	}
@@ -52,6 +52,6 @@ func (t *Ticket) handleModal(e *events.ModalSubmitInteractionCreate) {
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
 		discord.NewContainer(
 			discord.NewTextDisplay(fmt.Sprintf("チケットを作成しました: <#%d>", channelID)),
-		).WithAccentColor(0x2ECC71),
+		),
 	}))
 }

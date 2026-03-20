@@ -21,7 +21,7 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 				discord.NewSecondaryButton("← 戻る", ModuleID+":back"),
 				discord.NewDangerButton("キューをクリア", ModuleID+":clear_queue"),
 			),
-		).WithAccentColor(accentIdle)
+		)
 	}
 
 	var lines []string
@@ -59,5 +59,5 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 		),
 	}
 
-	return discord.NewContainer(components...).WithAccentColor(accentPlaying)
+	return discord.NewContainer(components...)
 }

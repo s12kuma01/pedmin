@@ -14,7 +14,7 @@ func (s *Settings) HandleCommand(e *events.ApplicationCommandInteractionCreate) 
 		_ = e.CreateMessage(ephemeralV2(
 			discord.NewContainer(
 				discord.NewTextDisplay("設定はサーバー内でのみ使用できます。"),
-			).WithAccentColor(0xFF0000),
+			),
 		))
 		return
 	}

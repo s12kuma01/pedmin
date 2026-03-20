@@ -7,9 +7,6 @@ import (
 	"github.com/disgoorg/disgolink/v3/disgolink"
 )
 
-const accentPlaying = 0x00B894
-const accentIdle = 0x636E72
-
 func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerComponent {
 	track := player.Track()
 	if track == nil {
@@ -33,7 +30,7 @@ func BuildPlayerUI(player disgolink.Player, queue *Queue) discord.ContainerCompo
 		)),
 		discord.NewLargeSeparator(),
 		buildButtonRow(queue.LoopMode()),
-	).WithAccentColor(accentPlaying)
+	)
 }
 
 func buildIdleUI(queue *Queue) discord.ContainerComponent {
@@ -42,7 +39,7 @@ func buildIdleUI(queue *Queue) discord.ContainerComponent {
 		discord.NewTextDisplay("再生中の曲はありません。ボタンから曲を追加してください！"),
 		discord.NewLargeSeparator(),
 		buildButtonRow(queue.LoopMode()),
-	).WithAccentColor(accentIdle)
+	)
 }
 
 func buildButtonRow(loopMode LoopMode) discord.ActionRowComponent {

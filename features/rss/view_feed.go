@@ -7,8 +7,6 @@ import (
 	"github.com/mmcdole/gofeed"
 )
 
-const colorRSS = 0xF39C12
-
 func BuildFeedAnnouncement(feedTitle string, item *gofeed.Item) discord.MessageCreate {
 	desc := truncate(stripHTML(item.Description), 300)
 
@@ -25,6 +23,6 @@ func BuildFeedAnnouncement(feedTitle string, item *gofeed.Item) discord.MessageC
 			discord.NewTextDisplay(fmt.Sprintf("### %s", feedTitle)),
 			discord.NewSmallSeparator(),
 			discord.NewTextDisplay(body),
-		).WithAccentColor(colorRSS),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }

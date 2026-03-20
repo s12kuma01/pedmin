@@ -12,7 +12,7 @@ func BuildManagePanel(feeds []store.RSSFeed) discord.MessageCreate {
 		return ephemeralV2(
 			discord.NewContainer(
 				discord.NewTextDisplay("登録されているフィードはありません。"),
-			).WithAccentColor(0x636E72),
+			),
 		)
 	}
 
@@ -37,7 +37,7 @@ func BuildManagePanel(feeds []store.RSSFeed) discord.MessageCreate {
 			discord.NewActionRow(
 				discord.NewStringSelectMenu(ModuleID+":manage_select", "フィードを選択...", options...),
 			),
-		).WithAccentColor(colorRSS),
+		),
 	)
 }
 
@@ -59,6 +59,6 @@ func BuildFeedDetail(feed store.RSSFeed) discord.MessageUpdate {
 			discord.NewActionRow(
 				discord.NewDangerButton("削除", fmt.Sprintf("%s:delete:%d", ModuleID, feed.ID)),
 			),
-		).WithAccentColor(colorRSS),
+		),
 	})
 }

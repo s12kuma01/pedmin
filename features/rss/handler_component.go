@@ -85,7 +85,7 @@ func (r *RSS) handleAddChannel(e *events.ComponentInteractionCreate, encodedURL 
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
 		discord.NewContainer(
 			discord.NewTextDisplay(fmt.Sprintf("**%s** を <#%d> に追加しました。", feed.Title, feed.ChannelID)),
-		).WithAccentColor(0x00B894),
+		),
 	}))
 }
 
@@ -153,7 +153,7 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 		_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{
 			discord.NewContainer(
 				discord.NewTextDisplay("登録されているフィードはありません。"),
-			).WithAccentColor(0x636E72),
+			),
 		}))
 		return
 	}
@@ -165,5 +165,5 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 func errorContainer(text string) discord.ContainerComponent {
 	return discord.NewContainer(
 		discord.NewTextDisplay(text),
-	).WithAccentColor(0xFF0000)
+	)
 }

@@ -8,17 +8,6 @@ import (
 	"github.com/disgoorg/snowflake/v2"
 )
 
-const (
-	colorMessageEdit   = 0xF39C12
-	colorMessageDelete = 0xE74C3C
-	colorMemberJoin    = 0x2ECC71
-	colorMemberLeave   = 0xE67E22
-	colorBan           = 0xE74C3C
-	colorUnban         = 0x3498DB
-	colorRole          = 0x9B59B6
-	colorChannel       = 0x1ABC9C
-)
-
 func BuildMessageEditLog(user discord.User, channelID snowflake.ID, oldContent, newContent string, oldAttachments, newAttachments []discord.Attachment) discord.MessageCreate {
 	title := "### ✏️ メッセージ編集"
 	body := fmt.Sprintf("**ユーザー:** <@%d>\n**チャンネル:** <#%d>\n**変更前:**\n> %s\n**変更後:**\n> %s",
@@ -43,7 +32,7 @@ func BuildMessageEditLog(user discord.User, channelID snowflake.ID, oldContent, 
 	}
 
 	return discord.NewMessageCreateV2(
-		discord.NewContainer(components...).WithAccentColor(colorMessageEdit),
+		discord.NewContainer(components...),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }
 
@@ -74,13 +63,13 @@ func BuildMessageDeleteLog(user *discord.User, channelID snowflake.ID, content s
 	}
 
 	return discord.NewMessageCreateV2(
-		discord.NewContainer(components...).WithAccentColor(colorMessageDelete),
+		discord.NewContainer(components...),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }
 
 func BuildMemberJoinLog(member discord.Member) discord.MessageCreate {
 	createdAt := member.User.CreatedAt().Format("2006-01-02")
-	return logMessage(colorMemberJoin,
+	return logMessage(
 		"### 📥 メンバー参加",
 		fmt.Sprintf("**ユーザー:** <@%d> (%s)\n**アカウント作成:** %s",
 			member.User.ID, member.User.Username, createdAt),
@@ -88,7 +77,7 @@ func BuildMemberJoinLog(member discord.Member) discord.MessageCreate {
 }
 
 func BuildMemberLeaveLog(user discord.User) discord.MessageCreate {
-	return logMessage(colorMemberLeave,
+	return logMessage(
 		"### 📤 メンバー退出",
 		fmt.Sprintf("**ユーザー:** <@%d> (%s)",
 			user.ID, user.Username),
@@ -96,7 +85,7 @@ func BuildMemberLeaveLog(user discord.User) discord.MessageCreate {
 }
 
 func BuildBanLog(user discord.User) discord.MessageCreate {
-	return logMessage(colorBan,
+	return logMessage(
 		"### 🔨 BAN",
 		fmt.Sprintf("**ユーザー:** <@%d> (ID: %d)",
 			user.ID, user.ID),
@@ -104,7 +93,7 @@ func BuildBanLog(user discord.User) discord.MessageCreate {
 }
 
 func BuildUnbanLog(user discord.User) discord.MessageCreate {
-	return logMessage(colorUnban,
+	return logMessage(
 		"### 🔓 BAN解除",
 		fmt.Sprintf("**ユーザー:** <@%d> (ID: %d)",
 			user.ID, user.ID),
@@ -128,7 +117,7 @@ func buildRoleLog(action string, role discord.Role) discord.MessageCreate {
 	if role.Color != 0 {
 		colorText = fmt.Sprintf("#%06X", role.Color)
 	}
-	return logMessage(colorRole,
+	return logMessage(
 		fmt.Sprintf("### 🏷️ ロール%s", action),
 		fmt.Sprintf("**ロール:** %s\n**色:** %s",
 			role.Name, colorText),
@@ -148,7 +137,7 @@ func BuildChannelDeleteLog(channel discord.GuildChannel) discord.MessageCreate {
 }
 
 func buildChannelLog(action string, channel discord.GuildChannel) discord.MessageCreate {
-	return logMessage(colorChannel,
+	return logMessage(
 		fmt.Sprintf("### 📁 チャンネル%s", action),
 		fmt.Sprintf("**チャンネル:** %s\n**タイプ:** %s",
 			channel.Name(), channelTypeName(channel.Type())),
@@ -242,12 +231,12 @@ func AttachmentsEqual(old, new []discord.Attachment) bool {
 	return true
 }
 
-func logMessage(color int, title, body string) discord.MessageCreate {
+func logMessage(title, body string) discord.MessageCreate {
 	return discord.NewMessageCreateV2(
 		discord.NewContainer(
 			discord.NewTextDisplay(title),
 			discord.NewSmallSeparator(),
 			discord.NewTextDisplay(body),
-		).WithAccentColor(color),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }

@@ -67,5 +67,5 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		discord.NewSmallSeparator(),
 		diskNetBlock,
 		gpuNpuBlock,
-	).WithAccentColor(0x2ECC71)
+	)
 }

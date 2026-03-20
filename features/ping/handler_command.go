@@ -15,6 +15,6 @@ func (p *Ping) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 			discord.NewTextDisplay(
 				fmt.Sprintf("🏓 Pong!\n**レイテンシ:** %dms", latency.Milliseconds()),
 			),
-		).WithAccentColor(0x00B894),
+		),
 	).WithEphemeral(true))
 }

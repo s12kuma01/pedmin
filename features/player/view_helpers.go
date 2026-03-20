@@ -44,6 +44,6 @@ func ephemeralV2Error(text string) discord.MessageCreate {
 	return discord.NewMessageCreateV2(
 		discord.NewContainer(
 			discord.NewTextDisplay(fmt.Sprintf("❌ %s", text)),
-		).WithAccentColor(0xFF0000),
+		),
 	).WithEphemeral(true)
 }

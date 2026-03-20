@@ -11,6 +11,6 @@ func BuildTicketPanel() discord.MessageCreate {
 			discord.NewActionRow(
 				discord.NewPrimaryButton("チケットを作成", ModuleID+":create"),
 			),
-		).WithAccentColor(0x3498DB),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }

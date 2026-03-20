@@ -22,7 +22,7 @@ func BuildTicketInfo(number int, userID snowflake.ID, subject, description strin
 			discord.NewActionRow(
 				discord.NewDangerButton("チケットを閉じる", ModuleID+":close"),
 			),
-		).WithAccentColor(0x3498DB),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }
 
@@ -38,6 +38,6 @@ func BuildArchiveInfo(number int, userID snowflake.ID, subject string) discord.M
 			discord.NewActionRow(
 				discord.NewDangerButton("チケットを削除", ModuleID+":delete"),
 			),
-		).WithAccentColor(0x95A5A6),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }

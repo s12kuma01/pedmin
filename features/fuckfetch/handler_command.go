@@ -18,7 +18,7 @@ func (f *Fuckfetch) HandleCommand(e *events.ApplicationCommandInteractionCreate)
 			discord.NewMessageUpdateV2([]discord.LayoutComponent{
 				discord.NewContainer(
 					discord.NewTextDisplay("❌ システム情報の取得に失敗: "+err.Error()),
-				).WithAccentColor(0xFF0000),
+				),
 			}),
 		)
 		return

@@ -52,7 +52,7 @@ func (s *Settings) buildMainContainer(guildID snowflake.ID) discord.ContainerCom
 		)
 	}
 
-	return discord.NewContainer(components...).WithAccentColor(0x00B894)
+	return discord.NewContainer(components...)
 }
 
 func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.MessageUpdate {
@@ -62,7 +62,7 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 		return discord.NewMessageUpdateV2([]discord.LayoutComponent{
 			discord.NewContainer(
 				discord.NewTextDisplay("モジュールが見つかりません。"),
-			).WithAccentColor(0xFF0000),
+			),
 		})
 	}
 
@@ -72,12 +72,10 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 	statusText := "無効"
 	toggleLabel := "有効にする"
 	toggleStyle := discord.ButtonStyleSuccess
-	accentColor := 0xFF6B6B
 	if enabled {
 		statusText = "有効"
 		toggleLabel = "無効にする"
 		toggleStyle = discord.ButtonStyleDanger
-		accentColor = 0x00B894
 	}
 
 	components := []discord.ContainerSubComponent{
@@ -106,7 +104,7 @@ func (s *Settings) modulePanel(guildID snowflake.ID, moduleID string) discord.Me
 	)
 
 	return discord.NewMessageUpdateV2([]discord.LayoutComponent{
-		discord.NewContainer(components...).WithAccentColor(accentColor),
+		discord.NewContainer(components...),
 	})
 }
 

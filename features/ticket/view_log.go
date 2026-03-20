@@ -47,6 +47,6 @@ func BuildTicketLog(ticket *store.Ticket) discord.MessageCreate {
 			discord.NewTextDisplay("### 📋 チケットログ"),
 			discord.NewSmallSeparator(),
 			discord.NewTextDisplay(body),
-		).WithAccentColor(0x95A5A6),
+		),
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }

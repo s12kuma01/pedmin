@@ -46,6 +46,6 @@ func (r *RSS) handleModal(e *events.ModalSubmitInteractionCreate) {
 				discord.NewChannelSelectMenu(ModuleID+":add_channel:"+encodedURL, "チャンネルを選択...").
 					WithChannelTypes(discord.ChannelTypeGuildText),
 			),
-		).WithAccentColor(0xF39C12),
+		),
 	))
 }

@@ -44,7 +44,7 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 					discord.NewChannelSelectMenu(ModuleID+":log_channel", "ログチャンネルを選択...").
 						WithChannelTypes(discord.ChannelTypeGuildText),
 				),
-			).WithAccentColor(0x3498DB),
+			),
 		).WithEphemeral(true))
 
 	case "log_channel":
@@ -70,7 +70,7 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 				discord.NewActionRow(
 					discord.NewRoleSelectMenu(ModuleID+":role", "サポートロールを選択..."),
 				),
-			).WithAccentColor(0x3498DB),
+			),
 		).WithEphemeral(true))
 
 	case "role":
@@ -97,7 +97,7 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 					discord.NewChannelSelectMenu(ModuleID+":deploy_channel", "チャンネルを選択...").
 						WithChannelTypes(discord.ChannelTypeGuildText),
 				),
-			).WithAccentColor(0x3498DB),
+			),
 		).WithEphemeral(true))
 
 	case "deploy_channel":
@@ -113,7 +113,7 @@ func (t *Ticket) handleComponent(e *events.ComponentInteractionCreate) {
 					discord.NewSuccessButton("設置する", ModuleID+":deploy_confirm:"+channelID.String()),
 					discord.NewSecondaryButton("キャンセル", ModuleID+":deploy_cancel"),
 				),
-			).WithAccentColor(0x3498DB),
+			),
 		}))
 
 	case "deploy_confirm":
