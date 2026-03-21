@@ -14,7 +14,7 @@ import (
 
 func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
-	p.logger.Info("component interaction received", slog.String("custom_id", customID))
+	p.logger.Debug("component interaction received", slog.String("custom_id", customID))
 	_, rest, _ := strings.Cut(customID, ":")
 
 	guildID := e.GuildID()

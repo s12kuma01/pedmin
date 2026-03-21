@@ -7,12 +7,12 @@ import (
 	"fmt"
 	"log/slog"
 
-	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/mmcdole/gofeed"
 	"github.com/s12kuma01/pedmin/store"
 )
 
+// MaxFeedsPerGuild limits feeds per guild to prevent poll overload and Discord rate-limit issues.
 const MaxFeedsPerGuild = 10
 
 func (r *RSS) AddFeed(ctx context.Context, guildID snowflake.ID, channelID snowflake.ID, url string) (*store.RSSFeed, error) {
@@ -103,8 +103,4 @@ func itemHash(item *gofeed.Item) string {
 	}
 	h := sha256.Sum256([]byte(key))
 	return fmt.Sprintf("%x", h)
-}
-
-func ephemeralV2(components ...discord.LayoutComponent) discord.MessageCreate {
-	return discord.NewMessageCreateV2(components...).WithEphemeral(true)
 }

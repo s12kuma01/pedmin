@@ -6,6 +6,8 @@ import (
 	"github.com/disgoorg/disgolink/v3/lavalink"
 )
 
+// Queue is a thread-safe playlist that manages an ordered list of tracks
+// with a current position and loop mode. All methods are safe for concurrent use.
 type Queue struct {
 	tracks  []lavalink.Track
 	current int

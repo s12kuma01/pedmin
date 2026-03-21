@@ -4,17 +4,18 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/lavalink"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	guildID := e.GuildID()
 	if guildID == nil {
-		_ = e.CreateMessage(ephemeralV2Error("このコマンドはサーバー内でのみ使用できます。"))
+		_ = e.CreateMessage(ui.EphemeralError("このコマンドはサーバー内でのみ使用できます。"))
 		return
 	}
 
 	if err := p.joinVoiceChannel(e.Client(), *guildID, e.Member().User.ID); err != nil {
-		_ = e.CreateMessage(ephemeralV2Error("ボイスチャンネルに接続してからコマンドを実行してください。"))
+		_ = e.CreateMessage(ui.EphemeralError("ボイスチャンネルに接続してからコマンドを実行してください。"))
 		return
 	}
 

@@ -3,28 +3,43 @@ package store
 import (
 	"database/sql"
 	"fmt"
-	"strings"
 	"time"
 
 	"github.com/disgoorg/snowflake/v2"
 )
 
 func (s *SQLiteStore) CreateRSSFeed(feed *RSSFeed) error {
+	var existingID int64
 	err := s.db.QueryRow(
+		"SELECT id FROM rss_feeds WHERE guild_id = ? AND url = ?",
+		int64(feed.GuildID), feed.URL,
+	).Scan(&existingID)
+	if err == nil {
+		return fmt.Errorf("%w: %s", ErrDuplicateFeed, feed.URL)
+	}
+	if err != sql.ErrNoRows {
+		return fmt.Errorf("failed to check existing feed: %w", err)
+	}
+
+	err = s.db.QueryRow(
 		"INSERT INTO rss_feeds (guild_id, url, channel_id, title) VALUES (?, ?, ?, ?) RETURNING id",
 		int64(feed.GuildID), feed.URL, int64(feed.ChannelID), feed.Title,
 	).Scan(&feed.ID)
-	if err != nil && strings.Contains(err.Error(), "UNIQUE constraint") {
-		return fmt.Errorf("%w: %s", ErrDuplicateFeed, feed.URL)
+	if err != nil {
+		return fmt.Errorf("failed to create feed: %w", err)
 	}
-	return err
+	return nil
 }
 
 func (s *SQLiteStore) DeleteRSSFeed(id int64, guildID snowflake.ID) error {
 	// Delete seen items first (SQLite foreign key support varies)
-	_, _ = s.db.Exec("DELETE FROM rss_seen_items WHERE feed_id = ?", id)
-	_, err := s.db.Exec("DELETE FROM rss_feeds WHERE id = ? AND guild_id = ?", id, int64(guildID))
-	return err
+	if _, err := s.db.Exec("DELETE FROM rss_seen_items WHERE feed_id = ?", id); err != nil {
+		return fmt.Errorf("failed to delete seen items for feed %d: %w", id, err)
+	}
+	if _, err := s.db.Exec("DELETE FROM rss_feeds WHERE id = ? AND guild_id = ?", id, int64(guildID)); err != nil {
+		return fmt.Errorf("failed to delete feed %d: %w", id, err)
+	}
+	return nil
 }
 
 func (s *SQLiteStore) GetRSSFeeds(guildID snowflake.ID) ([]RSSFeed, error) {
@@ -106,6 +121,8 @@ func (s *SQLiteStore) MarkItemsSeen(feedID int64, itemHashes []string) error {
 }
 
 func (s *SQLiteStore) PruneSeenItems(olderThan time.Time) error {
-	_, err := s.db.Exec("DELETE FROM rss_seen_items WHERE seen_at < ?", olderThan)
-	return err
+	if _, err := s.db.Exec("DELETE FROM rss_seen_items WHERE seen_at < ?", olderThan); err != nil {
+		return fmt.Errorf("failed to prune seen items: %w", err)
+	}
+	return nil
 }

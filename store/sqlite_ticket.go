@@ -2,6 +2,7 @@ package store
 
 import (
 	"database/sql"
+	"fmt"
 	"time"
 
 	"github.com/disgoorg/snowflake/v2"
@@ -12,7 +13,10 @@ func (s *SQLiteStore) CreateTicket(guildID snowflake.ID, number int, channelID, 
 		"INSERT INTO tickets (guild_id, number, channel_id, user_id, subject) VALUES (?, ?, ?, ?, ?)",
 		int64(guildID), number, int64(channelID), int64(userID), subject,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to create ticket #%d: %w", number, err)
+	}
+	return nil
 }
 
 func (s *SQLiteStore) GetTicketByChannel(channelID snowflake.ID) (*Ticket, error) {
@@ -50,10 +54,16 @@ func (s *SQLiteStore) CloseTicket(channelID snowflake.ID, closedBy snowflake.ID)
 		"UPDATE tickets SET closed_at = ?, closed_by = ? WHERE channel_id = ?",
 		time.Now().UTC(), int64(closedBy), int64(channelID),
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to close ticket in channel %d: %w", channelID, err)
+	}
+	return nil
 }
 
 func (s *SQLiteStore) DeleteTicket(channelID snowflake.ID) error {
 	_, err := s.db.Exec("DELETE FROM tickets WHERE channel_id = ?", int64(channelID))
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to delete ticket in channel %d: %w", channelID, err)
+	}
+	return nil
 }

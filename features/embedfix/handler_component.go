@@ -12,13 +12,12 @@ import (
 func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
 	customID := e.Data.CustomID()
 	// embedfix:translate:{screenName}:{tweetID}
-	parts := strings.SplitN(customID, ":", 4)
-	if len(parts) < 4 || parts[1] != "translate" {
+	_, rest, _ := strings.Cut(customID, ":")
+	action, rest, _ := strings.Cut(rest, ":")
+	if action != "translate" {
 		return
 	}
-
-	screenName := parts[2]
-	tweetID := parts[3]
+	screenName, tweetID, _ := strings.Cut(rest, ":")
 
 	_ = e.DeferUpdateMessage()
 

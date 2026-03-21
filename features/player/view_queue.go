@@ -25,8 +25,10 @@ func BuildQueueUI(queue *Queue, player disgolink.Player) discord.ContainerCompon
 	}
 
 	var lines []string
+	// queuePageSize limits the number of tracks shown per page to avoid exceeding Discord message size limits.
 	maxShow := 15
 	start := 0
+	// Keep the current track near the top (5th position) for context.
 	if currentIdx > 5 {
 		start = currentIdx - 5
 	}

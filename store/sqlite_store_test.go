@@ -1,6 +1,7 @@
 package store
 
 import (
+	"errors"
 	"path/filepath"
 	"sync"
 	"testing"
@@ -174,4 +175,40 @@ func TestSQLiteStore_ConcurrentAccess(t *testing.T) {
 		}(i)
 	}
 	wg.Wait()
+}
+
+func TestSQLiteStore_CreateDuplicateFeed(t *testing.T) {
+	s := newTestStore(t)
+
+	guildID := snowflake.ID(444444444)
+	channelID := snowflake.ID(555555555)
+
+	feed := &RSSFeed{
+		GuildID:   guildID,
+		URL:       "https://example.com/feed.xml",
+		ChannelID: channelID,
+		Title:     "Test Feed",
+	}
+
+	if err := s.CreateRSSFeed(feed); err != nil {
+		t.Fatalf("first CreateRSSFeed failed: %v", err)
+	}
+	if feed.ID == 0 {
+		t.Error("expected non-zero feed ID after creation")
+	}
+
+	duplicate := &RSSFeed{
+		GuildID:   guildID,
+		URL:       "https://example.com/feed.xml",
+		ChannelID: channelID,
+		Title:     "Duplicate Feed",
+	}
+
+	err := s.CreateRSSFeed(duplicate)
+	if err == nil {
+		t.Fatal("expected error for duplicate feed, got nil")
+	}
+	if !errors.Is(err, ErrDuplicateFeed) {
+		t.Errorf("expected ErrDuplicateFeed, got: %v", err)
+	}
 }

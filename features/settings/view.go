@@ -5,6 +5,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/s12kuma01/pedmin/module"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 // ModuleOption holds display data for a module in the settings panel.
@@ -17,7 +18,7 @@ type ModuleOption struct {
 
 // BuildMainPanel builds the initial settings panel message.
 func BuildMainPanel(options []ModuleOption) discord.MessageCreate {
-	return ephemeralV2(buildMainContainer(options))
+	return ui.EphemeralV2(buildMainContainer(options))
 }
 
 // BuildMainPanelUpdate builds the settings panel as a message update.
@@ -107,8 +108,4 @@ func BuildModuleNotFound() discord.MessageUpdate {
 			discord.NewTextDisplay("モジュールが見つかりません。"),
 		),
 	})
-}
-
-func ephemeralV2(components ...discord.LayoutComponent) discord.MessageCreate {
-	return discord.NewMessageCreateV2(components...).WithEphemeral(true)
 }

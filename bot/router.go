@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate) {
@@ -15,7 +16,7 @@ func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate
 			if cmd.CommandName() == cmdName {
 				guildID := e.GuildID()
 				if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
-					_ = e.CreateMessage(errorMessage("このモジュールは現在無効です。"))
+					_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
 					return
 				}
 				m.HandleCommand(e)
@@ -36,6 +37,12 @@ func (b *Bot) onComponentInteraction(e *events.ComponentInteractionCreate) {
 		return
 	}
 
+	guildID := e.GuildID()
+	if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
+		_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
+		return
+	}
+
 	m.HandleComponent(e)
 }
 
@@ -46,6 +53,12 @@ func (b *Bot) onModalSubmit(e *events.ModalSubmitInteractionCreate) {
 	m, ok := b.modules[moduleID]
 	if !ok {
 		b.Logger.Warn("unhandled modal", slog.String("custom_id", customID))
+		return
+	}
+
+	guildID := e.GuildID()
+	if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
+		_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
 		return
 	}
 

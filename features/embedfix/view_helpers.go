@@ -16,6 +16,7 @@ const (
 
 var tweetURLRegex = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
 
+// maxTweetURLs limits processed tweets per message to avoid response size limits.
 const maxTweetURLs = 3
 
 type tweetRef struct {

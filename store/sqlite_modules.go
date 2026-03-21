@@ -138,5 +138,8 @@ func (s *SQLiteStore) SetModuleSettings(guildID snowflake.ID, moduleID string, s
 		 ON CONFLICT(guild_id, module_id) DO UPDATE SET settings = excluded.settings`,
 		int64(guildID), moduleID, settings,
 	)
-	return err
+	if err != nil {
+		return fmt.Errorf("failed to set module settings for %s: %w", moduleID, err)
+	}
+	return nil
 }

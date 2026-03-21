@@ -5,11 +5,12 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/s12kuma01/pedmin/store"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func BuildManagePanel(feeds []store.RSSFeed) discord.MessageCreate {
 	if len(feeds) == 0 {
-		return ephemeralV2(
+		return ui.EphemeralV2(
 			discord.NewContainer(
 				discord.NewTextDisplay("登録されているフィードはありません。"),
 			),
@@ -29,7 +30,7 @@ func BuildManagePanel(feeds []store.RSSFeed) discord.MessageCreate {
 		})
 	}
 
-	return ephemeralV2(
+	return ui.EphemeralV2(
 		discord.NewContainer(
 			discord.NewTextDisplay("### RSSフィード管理"),
 			discord.NewSmallSeparator(),

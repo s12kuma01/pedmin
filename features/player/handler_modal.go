@@ -2,6 +2,7 @@ package player
 
 import (
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Player) HandleModal(e *events.ModalSubmitInteractionCreate) {
@@ -22,7 +23,7 @@ func (p *Player) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	}
 
 	if query == "" {
-		_ = e.CreateMessage(ephemeralV2Error("検索キーワードまたはURLを入力してください。"))
+		_ = e.CreateMessage(ui.EphemeralError("検索キーワードまたはURLを入力してください。"))
 		return
 	}
 

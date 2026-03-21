@@ -8,6 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (r *RSS) handleAddPrompt(e *events.ComponentInteractionCreate) {
@@ -27,7 +28,7 @@ func (r *RSS) handleAddPrompt(e *events.ComponentInteractionCreate) {
 func (r *RSS) handleAddChannel(e *events.ComponentInteractionCreate, encodedURL string) {
 	feedURL, err := url.QueryUnescape(encodedURL)
 	if err != nil {
-		_ = e.CreateMessage(ephemeralV2(errorContainer("無効なURLです。")))
+		_ = e.CreateMessage(ui.EphemeralV2(errorContainer("無効なURLです。")))
 		return
 	}
 

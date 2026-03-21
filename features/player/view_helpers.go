@@ -39,11 +39,3 @@ func formatDuration(d lavalink.Duration) string {
 	}
 	return fmt.Sprintf("%d:%02d", minutes, seconds)
 }
-
-func ephemeralV2Error(text string) discord.MessageCreate {
-	return discord.NewMessageCreateV2(
-		discord.NewContainer(
-			discord.NewTextDisplay(fmt.Sprintf("❌ %s", text)),
-		),
-	).WithEphemeral(true)
-}

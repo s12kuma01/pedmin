@@ -1,18 +1,14 @@
 package settings
 
 import (
-	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (s *Settings) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	guildID := e.GuildID()
 	if guildID == nil {
-		_ = e.CreateMessage(ephemeralV2(
-			discord.NewContainer(
-				discord.NewTextDisplay("設定はサーバー内でのみ使用できます。"),
-			),
-		))
+		_ = e.CreateMessage(ui.ErrorMessage("設定はサーバー内でのみ使用できます。"))
 		return
 	}
 

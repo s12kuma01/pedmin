@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
@@ -14,7 +15,7 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		info.OS,
 		info.Platform,
 		info.KernelVersion,
-		formatUptime(info.Uptime),
+		ui.FormatUptime(info.Uptime),
 	))
 
 	cpuBlock := discord.NewTextDisplay(fmt.Sprintf(
@@ -22,26 +23,26 @@ func BuildFuckfetchUI(info *SystemInfo) discord.ContainerComponent {
 		info.CPUModel,
 		info.CPUCores,
 		info.CPUThreads,
-		buildBar(info.CPUUsage),
+		ui.BuildBar(info.CPUUsage, 20, true),
 	))
 
 	memBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**RAM:** %s / %s %s\n**Swap:** %s / %s %s",
-		formatBytes(info.MemUsed),
-		formatBytes(info.MemTotal),
-		buildBar(info.MemUsage),
-		formatBytes(info.SwapUsed),
-		formatBytes(info.SwapTotal),
-		buildBar(info.SwapUsage),
+		ui.FormatBytes(info.MemUsed),
+		ui.FormatBytes(info.MemTotal),
+		ui.BuildBar(info.MemUsage, 20, true),
+		ui.FormatBytes(info.SwapUsed),
+		ui.FormatBytes(info.SwapTotal),
+		ui.BuildBar(info.SwapUsage, 20, true),
 	))
 
 	diskNetBlock := discord.NewTextDisplay(fmt.Sprintf(
 		"**Disk (/):** %s / %s %s\n**Net ↑:** %s  **Net ↓:** %s",
-		formatBytes(info.DiskUsed),
-		formatBytes(info.DiskTotal),
-		buildBar(info.DiskUsage),
-		formatBytes(info.NetBytesSent),
-		formatBytes(info.NetBytesRecv),
+		ui.FormatBytes(info.DiskUsed),
+		ui.FormatBytes(info.DiskTotal),
+		ui.BuildBar(info.DiskUsage, 20, true),
+		ui.FormatBytes(info.NetBytesSent),
+		ui.FormatBytes(info.NetBytesRecv),
 	))
 
 	gpuNpuBlock := discord.NewTextDisplay(fmt.Sprintf(

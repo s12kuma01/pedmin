@@ -9,12 +9,19 @@ services:
     ports:
       - "2333:2333"
     environment:
-      - _JAVA_OPTIONS=-Xmx512m
+      - _JAVA_OPTIONS=-Xms128M
     dns:
       - 8.8.8.8
       - 8.8.4.4
     healthcheck:
-      test: ["CMD", "wget", "-qO-", "--header=Authorization: youshallnotpass", "http://localhost:2333/version"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-qO-",
+          "--header=Authorization: youshallnotpass",
+          "http://localhost:2333/version",
+        ]
       interval: 10s
       timeout: 5s
       retries: 5

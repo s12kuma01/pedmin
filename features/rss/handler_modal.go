@@ -7,6 +7,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (r *RSS) handleModal(e *events.ModalSubmitInteractionCreate) {
@@ -21,7 +22,7 @@ func (r *RSS) handleModal(e *events.ModalSubmitInteractionCreate) {
 	feedURL = strings.TrimSpace(feedURL)
 
 	if feedURL == "" {
-		_ = e.CreateMessage(ephemeralV2(errorContainer("URLを入力してください。")))
+		_ = e.CreateMessage(ui.EphemeralV2(errorContainer("URLを入力してください。")))
 		return
 	}
 
@@ -31,13 +32,13 @@ func (r *RSS) handleModal(e *events.ModalSubmitInteractionCreate) {
 	}
 
 	if _, err := url.ParseRequestURI(feedURL); err != nil {
-		_ = e.CreateMessage(ephemeralV2(errorContainer("無効なURLです。")))
+		_ = e.CreateMessage(ui.EphemeralV2(errorContainer("無効なURLです。")))
 		return
 	}
 
 	encodedURL := url.QueryEscape(feedURL)
 
-	_ = e.CreateMessage(ephemeralV2(
+	_ = e.CreateMessage(ui.EphemeralV2(
 		discord.NewContainer(
 			discord.NewTextDisplay(fmt.Sprintf("**フィードURL:** %s", feedURL)),
 			discord.NewSmallSeparator(),

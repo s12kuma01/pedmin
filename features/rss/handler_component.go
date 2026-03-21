@@ -7,6 +7,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (r *RSS) handleComponent(e *events.ComponentInteractionCreate) {
@@ -41,7 +42,7 @@ func (r *RSS) handleManage(e *events.ComponentInteractionCreate) {
 	feeds, err := r.GetFeeds(*e.GuildID())
 	if err != nil {
 		r.logger.Error("failed to get feeds", slog.Any("error", err))
-		_ = e.CreateMessage(ephemeralV2(errorContainer("フィード一覧の取得に失敗しました。")))
+		_ = e.CreateMessage(ui.EphemeralV2(errorContainer("フィード一覧の取得に失敗しました。")))
 		return
 	}
 
@@ -80,7 +81,7 @@ func (r *RSS) handleDelete(e *events.ComponentInteractionCreate, feedIDStr strin
 	feeds, err := r.DeleteFeedAndList(feedID, *e.GuildID())
 	if err != nil {
 		r.logger.Error("failed to delete feed", slog.Any("error", err))
-		_ = e.CreateMessage(ephemeralV2(errorContainer("フィードの削除に失敗しました。")))
+		_ = e.CreateMessage(ui.EphemeralV2(errorContainer("フィードの削除に失敗しました。")))
 		return
 	}
 
