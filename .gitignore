@@ -36,5 +36,5 @@ config.toml
 data/
 
 # Editor/IDE
- .idea/
- .vscode/
+.idea/
+.vscode/
