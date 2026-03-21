@@ -13,6 +13,8 @@ import (
 
 const ModuleID = "embedfix"
 
+// TODO: Add embed replacement support for other SNS platforms (Reddit, TikTok, Instagram)
+
 type Bot interface {
 	IsModuleEnabled(guildID snowflake.ID, moduleID string) bool
 }
