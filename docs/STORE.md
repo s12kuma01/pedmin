@@ -9,24 +9,24 @@ type GuildStore interface {
     Save(settings *GuildSettings) error
     IsModuleEnabled(guildID snowflake.ID, moduleID string) (bool, error)
     SetModuleEnabled(guildID snowflake.ID, moduleID string, enabled bool) error
-    GetModuleSettings(guildID snowflake.ID, moduleID string) (map[string]any, error)
-    SetModuleSettings(guildID snowflake.ID, moduleID string, settings map[string]any) error
+    GetModuleSettings(guildID snowflake.ID, moduleID string) (string, error)
+    SetModuleSettings(guildID snowflake.ID, moduleID string, settings string) error
 
     // Tickets
-    CreateTicket(ticket *Ticket) error
+    CreateTicket(guildID snowflake.ID, number int, channelID, userID snowflake.ID, subject string) error
     GetTicketByChannel(channelID snowflake.ID) (*Ticket, error)
-    CloseTicket(channelID snowflake.ID) error
+    CloseTicket(channelID snowflake.ID, closedBy snowflake.ID) error
     DeleteTicket(channelID snowflake.ID) error
 
     // RSS
     CreateRSSFeed(feed *RSSFeed) error
-    DeleteRSSFeed(id int64) error
+    DeleteRSSFeed(id int64, guildID snowflake.ID) error
     GetRSSFeeds(guildID snowflake.ID) ([]RSSFeed, error)
     GetAllRSSFeeds() ([]RSSFeed, error)
     CountRSSFeeds(guildID snowflake.ID) (int, error)
-    IsItemSeen(feedID int64, guid string) (bool, error)
-    MarkItemsSeen(feedID int64, guids []string) error
-    PruneSeenItems(feedID int64, keep int) error
+    IsItemSeen(feedID int64, itemHash string) (bool, error)
+    MarkItemsSeen(feedID int64, itemHashes []string) error
+    PruneSeenItems(olderThan time.Time) error
 
     // Lifecycle
     Close() error
@@ -49,7 +49,7 @@ type GuildSettings struct {
 |-------|------|-------------|
 | `GuildID` | `snowflake.ID` | Discord guild ID |
 | `EnabledModules` | `map[string]bool` | Module ID → enabled state |
-| `ModuleSettings` | `map[string]any` | Module ID → arbitrary settings |
+| `ModuleSettings` | `map[string]any` | Module ID → arbitrary settings (internal use by `Get`/`Save`) |
 
 Default: when no record exists, returns empty maps with all modules disabled.
 
@@ -59,9 +59,13 @@ Default: when no record exists, returns empty maps with all modules disabled.
 ```go
 type Ticket struct {
     GuildID   snowflake.ID
+    Number    int
     ChannelID snowflake.ID
     UserID    snowflake.ID
+    Subject   string
+    CreatedAt time.Time
     ClosedAt  *time.Time
+    ClosedBy  *snowflake.ID
 }
 ```
 
@@ -70,8 +74,10 @@ type Ticket struct {
 type RSSFeed struct {
     ID        int64
     GuildID   snowflake.ID
-    ChannelID snowflake.ID
     URL       string
+    ChannelID snowflake.ID
+    Title     string
+    AddedAt   time.Time
 }
 ```
 
@@ -109,25 +115,34 @@ CREATE TABLE guild_module_settings (
 -- Migration 2: Tickets
 CREATE TABLE tickets (
     guild_id   INTEGER NOT NULL,
-    channel_id INTEGER NOT NULL PRIMARY KEY,
+    number     INTEGER NOT NULL,
+    channel_id INTEGER NOT NULL,
     user_id    INTEGER NOT NULL,
-    closed_at  TIMESTAMP
+    subject    TEXT    NOT NULL DEFAULT '',
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    closed_at  TIMESTAMP,
+    closed_by  INTEGER,
+    PRIMARY KEY (guild_id, number)
 );
-CREATE INDEX idx_tickets_channel ON tickets(channel_id);
+CREATE INDEX idx_tickets_channel ON tickets (channel_id);
 
 -- Migration 3: RSS feeds
 CREATE TABLE rss_feeds (
     id         INTEGER PRIMARY KEY AUTOINCREMENT,
     guild_id   INTEGER NOT NULL,
+    url        TEXT    NOT NULL,
     channel_id INTEGER NOT NULL,
-    url        TEXT    NOT NULL
+    title      TEXT    NOT NULL DEFAULT '',
+    added_at   TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(guild_id, url)
 );
+CREATE INDEX idx_rss_feeds_guild ON rss_feeds(guild_id);
 
 CREATE TABLE rss_seen_items (
     feed_id    INTEGER NOT NULL REFERENCES rss_feeds(id) ON DELETE CASCADE,
-    guid       TEXT    NOT NULL,
-    seen_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (feed_id, guid)
+    item_hash  TEXT    NOT NULL,
+    seen_at    TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (feed_id, item_hash)
 );
 ```
 
@@ -172,34 +187,33 @@ Applied automatically on `NewSQLiteStore()`.
 
 ## ModuleSettings Usage
 
+Modules use `GetModuleSettings`/`SetModuleSettings` to persist per-module configuration as JSON strings:
+
 ```go
-settings, _ := store.Get(guildID)
-if val, ok := settings.ModuleSettings["player"]; ok {
-    playerSettings := val.(map[string]any)
-}
+// Load
+data, _ := store.GetModuleSettings(guildID, "player")
+var settings PlayerSettings
+json.Unmarshal([]byte(data), &settings)
 
-settings.ModuleSettings["player"] = map[string]any{
-    "default_volume": 50,
-}
-store.Save(settings)
+// Save
+raw, _ := json.Marshal(settings)
+store.SetModuleSettings(guildID, "player", string(raw))
 ```
-
-Note: JSON serialization means numbers become `float64`, nested objects become `map[string]any`.
 
 ### Per-Module Settings Pattern
 
-Modules like `logger` and `ticket` use `GetModuleSettings`/`SetModuleSettings` with typed settings structs:
+Modules like `logger` and `ticket` wrap this in a `LoadSettings` helper:
 
 ```go
 func LoadSettings(store GuildStore, guildID snowflake.ID) (*Settings, error) {
-    raw, err := store.GetModuleSettings(guildID, ModuleID)
+    data, err := store.GetModuleSettings(guildID, ModuleID)
     if err != nil {
         return nil, err
     }
-    // Marshal raw map to JSON, then unmarshal to typed struct
     var s Settings
-    data, _ := json.Marshal(raw)
-    json.Unmarshal(data, &s)
+    if err := json.Unmarshal([]byte(data), &s); err != nil {
+        return &Settings{}, nil
+    }
     return &s, nil
 }
 ```

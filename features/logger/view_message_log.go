@@ -35,19 +35,31 @@ func BuildMessageEditLog(user discord.User, channelID snowflake.ID, oldContent, 
 	).WithAllowedMentions(&discord.AllowedMentions{})
 }
 
-func BuildMessageDeleteLog(user *discord.User, channelID snowflake.ID, content string, attachments []discord.Attachment) discord.MessageCreate {
+func BuildMessageDeleteLog(user *discord.User, channelID snowflake.ID, content string, attachments []discord.Attachment, forwarded bool) discord.MessageCreate {
 	userText := "*不明*"
 	if user != nil {
 		userText = fmt.Sprintf("<@%d>", user.ID)
 	}
-	contentText := content
-	if contentText == "" {
-		contentText = "*内容を取得できませんでした*"
-	}
 
 	title := "### 🗑️ メッセージ削除"
-	body := fmt.Sprintf("**ユーザー:** %s\n**チャンネル:** <#%d>\n**内容:**\n> %s",
-		userText, channelID, contentText)
+	hasContent := content != ""
+	hasAttachments := len(attachments) > 0
+
+	var body string
+	switch {
+	case hasContent && forwarded:
+		body = fmt.Sprintf("**ユーザー:** %s\n**チャンネル:** <#%d>\n**転送メッセージの内容:**\n> %s",
+			userText, channelID, content)
+	case hasContent:
+		body = fmt.Sprintf("**ユーザー:** %s\n**チャンネル:** <#%d>\n**内容:**\n> %s",
+			userText, channelID, content)
+	case !hasContent && !hasAttachments && user == nil:
+		body = fmt.Sprintf("**ユーザー:** %s\n**チャンネル:** <#%d>\n**内容:**\n> *内容を取得できませんでした*",
+			userText, channelID)
+	default:
+		body = fmt.Sprintf("**ユーザー:** %s\n**チャンネル:** <#%d>",
+			userText, channelID)
+	}
 
 	components := []discord.ContainerSubComponent{
 		discord.NewTextDisplay(title),
@@ -55,9 +67,13 @@ func BuildMessageDeleteLog(user *discord.User, channelID snowflake.ID, content s
 		discord.NewTextDisplay(body),
 	}
 
-	if len(attachments) > 0 {
+	if hasAttachments {
+		label := "**添付ファイル:**"
+		if forwarded {
+			label = "**転送メッセージの添付ファイル:**"
+		}
 		components = append(components, discord.NewSmallSeparator())
-		components = append(components, discord.NewTextDisplay("**添付ファイル:**"))
+		components = append(components, discord.NewTextDisplay(label))
 		components = append(components, buildAttachmentComponents(attachments)...)
 	}
 

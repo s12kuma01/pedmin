@@ -17,7 +17,7 @@ func (f *Fuckfetch) HandleCommand(e *events.ApplicationCommandInteractionCreate)
 			e.Client().ApplicationID, e.Token(),
 			discord.NewMessageUpdateV2([]discord.LayoutComponent{
 				discord.NewContainer(
-					discord.NewTextDisplay("❌ システム情報の取得に失敗: "+err.Error()),
+					discord.NewTextDisplay("❌ システム情報の取得に失敗: " + err.Error()),
 				),
 			}),
 		)

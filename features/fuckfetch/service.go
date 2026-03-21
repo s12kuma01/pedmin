@@ -17,7 +17,7 @@ import (
 type SystemInfo struct {
 	// OS
 	OS, Platform, KernelVersion string
-	Uptime                                time.Duration
+	Uptime                      time.Duration
 	// CPU
 	CPUModel   string
 	CPUCores   int // physical

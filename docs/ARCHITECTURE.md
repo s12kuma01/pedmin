@@ -16,7 +16,8 @@
                                   └──────────────┘
 ```
 
-Pedmin connects to Discord via the Gateway (WebSocket) using disgo. Voice playback is handled by Lavalink, connected through disgolink. Both services run as Docker containers.
+Pedmin connects to Discord via the Gateway (WebSocket) using disgo. Voice playback is handled by Lavalink, connected
+through disgolink. Both services run as Docker containers.
 
 ## Layered Feature Module Pattern
 
@@ -45,7 +46,8 @@ Each feature is a self-contained Go package with internal layer separation by fi
 └─────────────────────────────────────────────────┘
 ```
 
-All files within a feature share the same Go package. No sub-packages, no circular imports. File names indicate the layer and responsibility.
+All files within a feature share the same Go package. No sub-packages, no circular imports. File names indicate the
+layer and responsibility.
 
 ## Package Dependency Graph
 
@@ -59,134 +61,169 @@ main
       ├── settings   → module
       ├── ping       → module
       ├── avatar     → module
+      ├── embedfix   → module
       ├── fuckfetch  → module
+      ├── panel      → module
       ├── player     → module, disgolink
+      ├── url        → module
       ├── ticket     → module, store
       ├── logger     → module, store
       └── rss        → module, store
 ```
 
-Dependencies flow downward. Features never depend on each other. Modules that need bot functionality (settings, ticket, logger, rss) define a local `Bot` interface with only the methods they need, avoiding direct `bot` package imports.
+Dependencies flow downward. Features never depend on each other. Modules that need bot functionality (settings, embedfix,
+panel, ticket, logger, rss) define a local `Bot` interface with only the methods they need, avoiding direct `bot` package imports.
 
 ## File Responsibilities (1 File = 1 Concern)
 
 ### bot/
-| File | Responsibility |
-|------|---------------|
-| `bot.go` | Client init, module registry, Start/Close, module state checks |
-| `commands.go` | Slash command global sync |
-| `router.go` | Interaction dispatch to modules |
-| `ui.go` | Shared UI helpers (error messages) |
-| `voice.go` | VoiceState/VoiceServer event relay to Lavalink |
-| `presence.go` | Bot presence updater (CPU/RAM monitoring) |
+
+| File          | Responsibility                                                 |
+|---------------|----------------------------------------------------------------|
+| `bot.go`      | Client init, module registry, Start/Close, module state checks |
+| `commands.go` | Slash command global sync                                      |
+| `router.go`   | Interaction dispatch to modules                                |
+| `ui.go`       | Shared UI helpers (error messages)                             |
+| `voice.go`    | VoiceState/VoiceServer event relay to Lavalink                 |
+| `presence.go` | Bot presence updater (CPU/RAM monitoring)                      |
+
+### features/avatar/
+
+| File                 | Layer   | Responsibility              |
+|----------------------|---------|-----------------------------|
+| `module.go`          | Module  | Info, Commands              |
+| `handler_command.go` | Handler | `/avatar` command, user resolve |
+| `view_avatar.go`     | View    | Avatar MediaGallery builder |
+
+### features/embedfix/
+
+| File                   | Layer   | Responsibility                                    |
+|------------------------|---------|---------------------------------------------------|
+| `module.go`            | Module  | Info, Bot/Client deps, empty stubs                |
+| `listener.go`          | Handler | GuildMessageCreate listener, URL detection        |
+| `handler_component.go` | Handler | Translate button dispatch                         |
+| `client.go`            | Infra   | fxtwitter API + DeepL translation HTTP clients    |
+| `view.go`              | View    | Tweet embed UI builder (original + translated)    |
+| `view_helpers.go`      | View    | URL regex, number formatting, language names      |
 
 ### features/fuckfetch/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands |
-| `handler_command.go` | Handler | `/fuckfetch` command |
-| `service.go` | Service | System info gathering (CPU, RAM, Disk, GPU, NPU) |
-| `view.go` | View | Neofetch-style output builder |
-| `view_helpers.go` | View | Formatting helpers (bytes, bars, uptime) |
+
+| File                 | Layer   | Responsibility                                   |
+|----------------------|---------|--------------------------------------------------|
+| `module.go`          | Module  | Info, Commands                                   |
+| `handler_command.go` | Handler | `/fuckfetch` command                             |
+| `service.go`         | Service | System info gathering (CPU, RAM, Disk, GPU, NPU) |
+| `view.go`            | View    | Neofetch-style output builder                    |
+| `view_helpers.go`    | View    | Formatting helpers (bytes, bars, uptime)         |
 
 ### features/panel/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands, permission check |
-| `handler_command.go` | Handler | `/panel` slash command |
-| `handler_component.go` | Handler | Button/select dispatch + modal handling |
-| `service.go` | Service | Server list/detail/power/console operations |
-| `client.go` | Infra | Pelican API HTTP client |
-| `view_panel.go` | View | Server list, detail, error panels |
-| `view_helpers.go` | View | Format helpers (bytes, bars, uptime, emoji) |
+
+| File                   | Layer   | Responsibility                              |
+|------------------------|---------|---------------------------------------------|
+| `module.go`            | Module  | Info, Commands, permission check            |
+| `handler_command.go`   | Handler | `/panel` slash command                      |
+| `handler_component.go` | Handler | Button/select dispatch + modal handling     |
+| `service.go`           | Service | Server list/detail/power/console operations |
+| `client.go`            | Infra   | Pelican API HTTP client                     |
+| `view_panel.go`        | View    | Server list, detail, error panels           |
+| `view_helpers.go`      | View    | Format helpers (bytes, bars, uptime, emoji) |
 
 ### features/player/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands, empty stubs |
-| `handler_command.go` | Handler | `/player` slash command |
-| `handler_component.go` | Handler | Button/select switch + delegation |
-| `handler_modal.go` | Handler | Add-to-queue modal processing |
-| `service.go` | Service | Playback control (pause, skip, volume, track loading) |
-| `voice.go` | Service | Voice channel connection |
-| `queue.go` | Domain | Queue data structure |
-| `queue_manager.go` | Domain | Per-guild queue management |
-| `loop_mode.go` | Domain | LoopMode type definition |
-| `lavalink.go` | Infra | Lavalink event listeners, node connection |
-| `auto_leave.go` | Service | Auto-leave on empty VC |
-| `view_player.go` | View | Player UI builder |
-| `view_queue.go` | View | Queue list UI builder |
-| `view_helpers.go` | View | Progress bar, duration format, thumbnails |
+
+| File                   | Layer   | Responsibility                                        |
+|------------------------|---------|-------------------------------------------------------|
+| `module.go`            | Module  | Info, Commands, empty stubs                           |
+| `handler_command.go`   | Handler | `/player` slash command                               |
+| `handler_component.go` | Handler | Button/select switch + delegation                     |
+| `handler_modal.go`     | Handler | Add-to-queue modal processing                         |
+| `service.go`           | Service | Playback control (pause, skip, volume, track loading) |
+| `voice.go`             | Service | Voice channel connection                              |
+| `queue.go`             | Domain  | Queue data structure                                  |
+| `queue_manager.go`     | Domain  | Per-guild queue management                            |
+| `loop_mode.go`         | Domain  | LoopMode type definition                              |
+| `lavalink.go`          | Infra   | Lavalink event listeners, node connection             |
+| `auto_leave.go`        | Service | Auto-leave on empty VC                                |
+| `view_player.go`       | View    | Player UI builder                                     |
+| `view_queue.go`        | View    | Queue list UI builder                                 |
+| `view_helpers.go`      | View    | Progress bar, duration format, thumbnails             |
 
 ### features/ping/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands, empty stubs |
-| `handler_command.go` | Handler | `/ping` command |
-| `view.go` | View | Ping response UI builder |
+
+| File                 | Layer   | Responsibility              |
+|----------------------|---------|-----------------------------|
+| `module.go`          | Module  | Info, Commands, empty stubs |
+| `handler_command.go` | Handler | `/ping` command             |
+| `view.go`            | View    | Ping response UI builder    |
 
 ### features/settings/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands, Bot interface, empty stubs |
+
+| File         | Layer   | Responsibility                                     |
+|--------------|---------|----------------------------------------------------|
+| `module.go`  | Module  | Info, Commands, Bot interface, empty stubs         |
 | `handler.go` | Handler | Command/component routing, module data preparation |
-| `view.go` | View | Main panel, module panel builders (pure functions) |
+| `view.go`    | View    | Main panel, module panel builders (pure functions) |
 
 ### features/ticket/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Bot/Client/Store deps |
-| `handler_component.go` | Handler | Create/close/reopen ticket buttons |
-| `handler_settings.go` | Handler | Settings UI interactions (category, log channel, role) |
-| `handler_modal.go` | Handler | Ticket creation modal |
-| `handler_deploy.go` | Handler | Panel deployment |
-| `service.go` | Service | Ticket creation/closure/settings logic |
-| `service_log.go` | Service | Log & transcript sending |
-| `settings.go` | Domain | Settings struct & persistence |
-| `transcript.go` | Service | HTML transcript generation |
-| `view_settings.go` | View | Settings panel UI |
-| `view_panel.go` | View | Ticket control panel UI |
-| `view_ticket.go` | View | Ticket channel message UI |
-| `view_log.go` | View | Ticket list/log UI |
+
+| File                   | Layer   | Responsibility                                         |
+|------------------------|---------|--------------------------------------------------------|
+| `module.go`            | Module  | Info, Bot/Client/Store deps                            |
+| `handler_component.go` | Handler | Create/close/reopen ticket buttons                     |
+| `handler_settings.go`  | Handler | Settings UI interactions (category, log channel, role) |
+| `handler_modal.go`     | Handler | Ticket creation modal                                  |
+| `handler_deploy.go`    | Handler | Panel deployment                                       |
+| `service.go`           | Service | Ticket creation/closure/settings logic                 |
+| `service_log.go`       | Service | Log & transcript sending                               |
+| `settings.go`          | Domain  | Settings struct & persistence                          |
+| `transcript.go`        | Service | HTML transcript generation                             |
+| `view_settings.go`     | View    | Settings panel UI                                      |
+| `view_panel.go`        | View    | Ticket control panel UI                                |
+| `view_ticket.go`       | View    | Ticket channel message UI                              |
+| `view_log.go`          | View    | Ticket list/log UI                                     |
 
 ### features/url/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Commands |
-| `handler_command.go` | Handler | `/url` command |
+
+| File                   | Layer   | Responsibility                       |
+|------------------------|---------|--------------------------------------|
+| `module.go`            | Module  | Info, Commands                       |
+| `handler_command.go`   | Handler | `/url` command                       |
 | `handler_component.go` | Handler | Button dispatch (shorten/check/back) |
-| `handler_modal.go` | Handler | Modal submission (shorten/check) |
-| `service.go` | Service | URL validation, shorten, scan |
-| `client.go` | Infra | x.gd + VirusTotal HTTP clients |
-| `view.go` | View | Main panel, result, error panels |
+| `handler_modal.go`     | Handler | Modal submission (shorten/check)     |
+| `service.go`           | Service | URL validation, shorten, scan        |
+| `client.go`            | Infra   | x.gd + VirusTotal HTTP clients       |
+| `view.go`              | View    | Main panel, result, error panels     |
 
 ### features/logger/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Bot/Client/Store deps |
-| `listener.go` | Handler | Event listeners (messages, members, bans, roles, channels) |
-| `handler.go` | Handler | Component interaction handling |
-| `settings.go` | Domain | Logger settings (channel ID, event toggles) |
-| `view_settings.go` | View | Settings UI |
-| `view_log.go` | View | Log message builders (text, attachments, MediaGallery) |
+
+| File               | Layer   | Responsibility                                             |
+|--------------------|---------|------------------------------------------------------------|
+| `module.go`        | Module  | Info, Bot/Client/Store deps                                |
+| `listener.go`      | Handler | Event listeners (messages, members, bans, roles, channels) |
+| `handler.go`       | Handler | Component interaction handling                             |
+| `settings.go`      | Domain  | Logger settings (channel ID, event toggles)                |
+| `view_settings.go` | View    | Settings UI                                                |
+| `view_log.go`      | View    | Log message builders (text, attachments, MediaGallery)     |
 
 ### features/rss/
-| File | Layer | Responsibility |
-|------|-------|---------------|
-| `module.go` | Module | Info, Bot/Client/Store deps |
-| `handler_component.go` | Handler | Add/remove feed dispatch |
-| `handler_modal.go` | Handler | Feed URL input modal |
-| `service.go` | Service | Feed CRUD, validation, post logic |
-| `service_poll.go` | Service | Single feed poll logic |
-| `poller.go` | Infra | Background polling routine |
-| `view_settings.go` | View | Settings panel (feed count) |
-| `view_manage.go` | View | Feed list/detail UI, error container |
-| `view_feed.go` | View | Feed item announcement builder |
-| `view_helpers.go` | View | Text utilities (stripHTML, truncate) |
+
+| File                   | Layer   | Responsibility                       |
+|------------------------|---------|--------------------------------------|
+| `module.go`            | Module  | Info, Bot/Client/Store deps          |
+| `handler_component.go` | Handler | Add/remove feed dispatch             |
+| `handler_add_feed.go`  | Handler | Add feed prompt & validation         |
+| `handler_modal.go`     | Handler | Feed URL input modal                 |
+| `service.go`           | Service | Feed CRUD, validation, post logic    |
+| `service_poll.go`      | Service | Single feed poll logic               |
+| `poller.go`            | Infra   | Background polling routine           |
+| `view_settings.go`     | View    | Settings panel (feed count)          |
+| `view_manage.go`       | View    | Feed list/detail UI, error container |
+| `view_feed.go`         | View    | Feed item announcement builder       |
+| `view_helpers.go`      | View    | Text utilities (stripHTML, truncate) |
 
 ## Data Flow
 
 ### Command Interaction
+
 ```
 1. User types /player
 2. Discord Gateway → disgo
@@ -198,6 +235,7 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 ```
 
 ### Component Interaction
+
 ```
 1. User clicks ⏭ (skip button)
 2. Discord Gateway → disgo
@@ -210,6 +248,7 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 ```
 
 ### Voice / Lavalink
+
 ```
 1. User adds a track via modal
 2. handler_modal.go → service.go: loadAndPlay()
@@ -221,6 +260,7 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 ```
 
 ### Event Listeners (Logger)
+
 ```
 1. User deletes a message
 2. Discord Gateway → disgo
@@ -235,6 +275,7 @@ Dependencies flow downward. Features never depend on each other. Modules that ne
 All UI uses Discord Components V2 (`discord.NewMessageCreateV2()`). No embeds. No accent colors on containers.
 
 ### Layout Hierarchy
+
 ```
 MessageCreate (V2 flag)
  └── ContainerComponent

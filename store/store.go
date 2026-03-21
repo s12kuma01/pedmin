@@ -11,9 +11,9 @@ import (
 var ErrDuplicateFeed = errors.New("duplicate feed")
 
 type GuildSettings struct {
-	GuildID        snowflake.ID          `json:"guild_id"`
-	EnabledModules map[string]bool       `json:"enabled_modules"`
-	ModuleSettings map[string]any        `json:"module_settings"`
+	GuildID        snowflake.ID    `json:"guild_id"`
+	EnabledModules map[string]bool `json:"enabled_modules"`
+	ModuleSettings map[string]any  `json:"module_settings"`
 }
 
 type Ticket struct {

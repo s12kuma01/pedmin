@@ -1,8 +1,11 @@
 # Pedmin - Discord Bot
 
-Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and disgo v0.19.2. It serves as a Probot replacement, featuring Components V2 UI, music playback via Lavalink, and a layered Feature Module architecture. Runs on Windows Docker Desktop.
+Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and disgo v0.19.2. It serves as a Probot
+replacement, featuring Components V2 UI, music playback via Lavalink, and a layered Feature Module architecture. Runs on
+Windows Docker Desktop.
 
 ## Tech Stack
+
 - **Language**: Go 1.26.1
 - **Discord Library**: disgo v0.19.2
 - **Lavalink Client**: disgolink v3.1.0
@@ -11,6 +14,7 @@ Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and 
 - **Configuration**: Environment variables (secrets) + TOML file (app settings)
 
 ## Commands
+
 ```bash
 # Build
 go build ./...
@@ -29,7 +33,8 @@ docker compose build     # Rebuild bot image
 
 ## Architecture: Layered Feature Module Pattern
 
-Each feature is a self-contained module with internal layer separation (handler/service/view), all within the same Go package.
+Each feature is a self-contained module with internal layer separation (handler/service/view), all within the same Go
+package.
 
 ```
 main.go                        # Entrypoint: DI wiring, graceful shutdown
@@ -44,7 +49,8 @@ bot/
 └── presence.go                # Bot presence updater (CPU/RAM monitoring)
 store/
 ├── store.go                   # GuildStore interface
-└── sqlite_store.go            # SQLite implementation (WAL mode, migrations)
+├── sqlite_store.go            # SQLite implementation (WAL mode)
+└── sqlite_migrations.go       # Schema migrations
 features/settings/
 ├── module.go                  # Info, Commands, Bot interface
 ├── handler.go                 # HandleCommand / HandleComponent
@@ -125,6 +131,7 @@ features/logger/
 features/rss/
 ├── module.go                  # Info, Bot/Client/Store deps
 ├── handler_component.go       # Add/remove feed dispatch
+├── handler_add_feed.go        # Add feed prompt & validation
 ├── handler_modal.go           # Feed URL input modal
 ├── service.go                 # Feed CRUD, validation, post logic
 ├── service_poll.go            # Single feed poll logic
@@ -138,24 +145,34 @@ features/rss/
 ## Key Design Decisions
 
 ### 1 File = 1 Responsibility
+
 Every `.go` file has a single, clear responsibility. No file mixes handler logic with UI building or service logic.
 
 ### Feature Module Pattern
-Each feature (`features/player/`, `features/settings/`) is a self-contained Go package. Internal layers (handler → service → view) are separated by file, not by package. Same `package player` throughout — no circular import issues.
+
+Each feature (`features/player/`, `features/settings/`) is a self-contained Go package. Internal layers (handler →
+service → view) are separated by file, not by package. Same `package player` throughout — no circular import issues.
 
 ### Module Interface (`module.Module`)
-All features implement: `Info()`, `Commands()`, `HandleCommand()`, `HandleComponent()`, `HandleModal()`, `SettingsPanel()`, `HandleSettingsComponent()`. Registered in `main.go` via `bot.Register()`.
+
+All features implement: `Info()`, `Commands()`, `HandleCommand()`, `HandleComponent()`, `HandleModal()`,
+`SettingsPanel()`, `HandleSettingsComponent()`. Registered in `main.go` via `bot.Register()`.
 
 ### CustomID Convention
+
 Component CustomIDs follow `{moduleID}:{action}:{extra}`. Router splits on the first colon to dispatch.
 
 ### Components V2
-All UI uses `discord.NewMessageCreateV2()`. View files are pure functions: state in → components out. No accent colors on containers.
+
+All UI uses `discord.NewMessageCreateV2()`. View files are pure functions: state in → components out. No accent colors
+on containers.
 
 ### GuildStore Interface
+
 `store.GuildStore` abstracts persistence. SQLite at `data/pedmin.db` with WAL mode. No JSON fallback.
 
 ## Documentation
+
 - `docs/ARCHITECTURE.md` - System architecture, layers, data flow
 - `docs/MODULE_GUIDE.md` - How to create new modules
 - `docs/COMPONENTS_V2.md` - Components V2 reference for disgo

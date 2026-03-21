@@ -2,7 +2,8 @@
 
 ## Architecture Overview
 
-Each module follows the **Feature Module Pattern**: a single Go package containing handler, service, and view layers separated by file.
+Each module follows the **Feature Module Pattern**: a single Go package containing handler, service, and view layers
+separated by file.
 
 ```
 features/myfeature/
@@ -95,19 +96,21 @@ b.Register(myModule)
 
 ## Layer Responsibilities
 
-| Layer | File pattern | Does | Does NOT |
-|-------|-------------|------|----------|
-| **Module** | `module.go` | Define struct, Info, Commands, stubs | Contain logic |
-| **Handler** | `handler*.go` | Parse interaction, call service, build response | Contain business logic, API calls, or store access |
-| **Service** | `service*.go` | Business logic, API calls, store operations | Build Discord UI components |
-| **View** | `view*.go` | Build Components V2 UI (pure functions: data in → components out) | Have side effects, call APIs, or access store |
-| **Client** | `client.go` | External API HTTP wrappers | Contain business logic |
-| **Domain** | `queue.go` etc. | Data structures, types | Import Discord packages |
+| Layer       | File pattern    | Does                                                              | Does NOT                                           |
+|-------------|-----------------|-------------------------------------------------------------------|----------------------------------------------------|
+| **Module**  | `module.go`     | Define struct, Info, Commands, stubs                              | Contain logic                                      |
+| **Handler** | `handler*.go`   | Parse interaction, call service, build response                   | Contain business logic, API calls, or store access |
+| **Service** | `service*.go`   | Business logic, API calls, store operations                       | Build Discord UI components                        |
+| **View**    | `view*.go`      | Build Components V2 UI (pure functions: data in → components out) | Have side effects, call APIs, or access store      |
+| **Client**  | `client.go`     | External API HTTP wrappers                                        | Contain business logic                             |
+| **Domain**  | `queue.go` etc. | Data structures, types                                            | Import Discord packages                            |
 
 ### Layer Rules
 
-1. **Handlers are dispatchers only.** A handler method should: defer the interaction → call service → call view → respond. No business logic, no direct API calls, no store access.
-2. **Services own all logic.** Any operation that involves validation, state changes, external API calls, or store reads/writes belongs in `service*.go`.
+1. **Handlers are dispatchers only.** A handler method should: defer the interaction → call service → call view →
+   respond. No business logic, no direct API calls, no store access.
+2. **Services own all logic.** Any operation that involves validation, state changes, external API calls, or store
+   reads/writes belongs in `service*.go`.
 3. **Views are pure functions.** They take data as input and return Discord components as output. No side effects.
 4. **Clients are HTTP wrappers.** They translate Go method calls to HTTP requests and responses. No business logic.
 
@@ -136,15 +139,15 @@ func buildResultUI(result string) discord.ContainerComponent {
 
 ## Module Interface Reference
 
-| Method | When Called | Purpose |
-|--------|-----------|---------|
-| `Info()` | Registration, routing | Module metadata |
-| `Commands()` | `SyncCommands` | Slash command definitions |
-| `HandleCommand(e)` | User runs a slash command | Process command |
-| `HandleComponent(e)` | User clicks button/select with matching CustomID | Handle interaction |
-| `HandleModal(e)` | User submits modal with matching CustomID | Process modal data |
-| `SettingsPanel(guildID)` | User views module in /settings | Return settings UI |
-| `HandleSettingsComponent(e)` | User interacts in settings panel | Handle settings interaction |
+| Method                       | When Called                                      | Purpose                     |
+|------------------------------|--------------------------------------------------|-----------------------------|
+| `Info()`                     | Registration, routing                            | Module metadata             |
+| `Commands()`                 | `SyncCommands`                                   | Slash command definitions   |
+| `HandleCommand(e)`           | User runs a slash command                        | Process command             |
+| `HandleComponent(e)`         | User clicks button/select with matching CustomID | Handle interaction          |
+| `HandleModal(e)`             | User submits modal with matching CustomID        | Process modal data          |
+| `SettingsPanel(guildID)`     | User views module in /settings                   | Return settings UI          |
+| `HandleSettingsComponent(e)` | User interacts in settings panel                 | Handle settings interaction |
 
 ## CustomID Convention
 
@@ -157,6 +160,7 @@ func buildResultUI(result string) discord.ContainerComponent {
 - **extra**: Optional data (e.g., target ID, page number)
 
 Examples:
+
 ```
 player:pause              → Player module, pause action
 player:vol_up             → Player module, volume up

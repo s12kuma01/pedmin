@@ -11,16 +11,16 @@ import (
 	"github.com/s12kuma01/pedmin/bot"
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/features/avatar"
-	"github.com/s12kuma01/pedmin/features/fuckfetch"
 	"github.com/s12kuma01/pedmin/features/embedfix"
+	"github.com/s12kuma01/pedmin/features/fuckfetch"
 	loggermod "github.com/s12kuma01/pedmin/features/logger"
 	panelmod "github.com/s12kuma01/pedmin/features/panel"
-	urlmod "github.com/s12kuma01/pedmin/features/url"
 	"github.com/s12kuma01/pedmin/features/ping"
 	"github.com/s12kuma01/pedmin/features/player"
 	rssmod "github.com/s12kuma01/pedmin/features/rss"
 	"github.com/s12kuma01/pedmin/features/settings"
 	ticketmod "github.com/s12kuma01/pedmin/features/ticket"
+	urlmod "github.com/s12kuma01/pedmin/features/url"
 	"github.com/s12kuma01/pedmin/store"
 )
 

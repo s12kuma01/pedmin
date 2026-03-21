@@ -35,9 +35,9 @@ type Tweet struct {
 }
 
 type TweetAuthor struct {
-	Name      string
+	Name       string
 	ScreenName string
-	AvatarURL string
+	AvatarURL  string
 }
 
 type TweetMedia struct {

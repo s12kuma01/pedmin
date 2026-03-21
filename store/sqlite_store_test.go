@@ -175,4 +175,3 @@ func TestSQLiteStore_ConcurrentAccess(t *testing.T) {
 	}
 	wg.Wait()
 }
-

@@ -3,7 +3,9 @@
 ## Setup
 
 ### Docker Compose
+
 Lavalink runs as a Docker container alongside the bot:
+
 ```yaml
 services:
   lavalink:
@@ -13,21 +15,25 @@ services:
 ```
 
 ### Configuration (`lavalink/application.yml`)
+
 Key settings:
+
 - `server.port`: WebSocket/REST port (default: 2333)
 - `lavalink.server.password`: Authentication password
 - `lavalink.server.sources`: Enable/disable audio sources
 - `lavalink.plugins`: Plugin dependencies and repositories
 
 ### Environment Variables
-| Variable | Default | Description |
-|----------|---------|-------------|
-| `LAVALINK_HOST` | `lavalink:2333` | Lavalink address |
+
+| Variable            | Default           | Description            |
+|---------------------|-------------------|------------------------|
+| `LAVALINK_HOST`     | `lavalink:2333`   | Lavalink address       |
 | `LAVALINK_PASSWORD` | `youshallnotpass` | Lavalink auth password |
 
 ## disgolink API
 
 ### Connecting to a Node
+
 ```go
 link := disgolink.New(botAppID)
 _, err := link.AddNode(ctx, disgolink.NodeConfig{
@@ -38,6 +44,7 @@ _, err := link.AddNode(ctx, disgolink.NodeConfig{
 ```
 
 ### Loading Tracks
+
 ```go
 node := link.BestNode()
 
@@ -55,6 +62,7 @@ result, err := node.LoadTracks(ctx, "ytsearch:query")
 ```
 
 ### Player Operations
+
 ```go
 player := link.Player(guildID)
 
@@ -79,6 +87,7 @@ link.RemovePlayer(guildID)
 ```
 
 ### Reading Player State
+
 ```go
 player.Track()    // *lavalink.Track (nil if nothing playing)
 player.Paused()   // bool
@@ -89,6 +98,7 @@ player.Volume()   // int (0-200)
 ## Event Listeners
 
 Register listeners on the disgolink client:
+
 ```go
 link.AddListeners(
     disgolink.NewListenerFunc(func(player disgolink.Player, event lavalink.TrackStartEvent) {
@@ -104,26 +114,29 @@ link.AddListeners(
 ```
 
 ### Event Types
-| Event | When |
-|-------|------|
-| `TrackStartEvent` | Track begins playing |
-| `TrackEndEvent` | Track finishes/fails/is replaced |
-| `TrackExceptionEvent` | Playback error |
-| `TrackStuckEvent` | Track stuck (no audio frames) |
-| `WebSocketClosedEvent` | Voice WebSocket closed |
+
+| Event                  | When                             |
+|------------------------|----------------------------------|
+| `TrackStartEvent`      | Track begins playing             |
+| `TrackEndEvent`        | Track finishes/fails/is replaced |
+| `TrackExceptionEvent`  | Playback error                   |
+| `TrackStuckEvent`      | Track stuck (no audio frames)    |
+| `WebSocketClosedEvent` | Voice WebSocket closed           |
 
 ### TrackEndReason Values
-| Reason | Meaning | Action |
-|--------|---------|--------|
-| `TrackEndReasonFinished` | Normal completion | Play next |
-| `TrackEndReasonLoadFailed` | Failed to load | Play next / notify |
-| `TrackEndReasonStopped` | Manually stopped | Do nothing |
-| `TrackEndReasonReplaced` | Another track started | Do nothing |
-| `TrackEndReasonCleanup` | Player destroyed | Do nothing |
+
+| Reason                     | Meaning               | Action             |
+|----------------------------|-----------------------|--------------------|
+| `TrackEndReasonFinished`   | Normal completion     | Play next          |
+| `TrackEndReasonLoadFailed` | Failed to load        | Play next / notify |
+| `TrackEndReasonStopped`    | Manually stopped      | Do nothing         |
+| `TrackEndReasonReplaced`   | Another track started | Do nothing         |
+| `TrackEndReasonCleanup`    | Player destroyed      | Do nothing         |
 
 ## Voice Connection
 
 For Lavalink to work, voice state/server updates must be forwarded:
+
 ```go
 // In bot initialization
 bot.WithEventListenerFunc(func(e *events.GuildVoiceStateUpdate) {
@@ -139,6 +152,7 @@ bot.WithEventListenerFunc(func(e *events.VoiceServerUpdate) {
 ```
 
 To join a voice channel:
+
 ```go
 client.UpdateVoiceState(ctx, guildID, &channelID, false, true) // selfMute=false, selfDeaf=true
 ```
@@ -146,7 +160,9 @@ client.UpdateVoiceState(ctx, guildID, &channelID, false, true) // selfMute=false
 ## Plugins
 
 ### lavasearch-plugin
+
 Provides enhanced search across multiple sources:
+
 ```yaml
 plugins:
   lavasearch:
@@ -156,7 +172,9 @@ plugins:
 ```
 
 ### lavalyrics-plugin
+
 Provides lyrics for playing tracks:
+
 ```yaml
 plugins:
   lavalyrics:
@@ -166,10 +184,10 @@ plugins:
 
 ## Troubleshooting
 
-| Problem | Solution |
-|---------|----------|
-| `no lavalink node available` | Check Lavalink is running and accessible |
-| Connection refused | Verify host/port in env vars matches Lavalink config |
-| No audio | Ensure bot is deafened, voice events are forwarded |
-| Track load fails | Check Lavalink logs for source-specific errors |
-| WebSocket closed (4014) | Bot needs `GuildVoiceStates` intent |
+| Problem                      | Solution                                             |
+|------------------------------|------------------------------------------------------|
+| `no lavalink node available` | Check Lavalink is running and accessible             |
+| Connection refused           | Verify host/port in env vars matches Lavalink config |
+| No audio                     | Ensure bot is deafened, voice events are forwarded   |
+| Track load fails             | Check Lavalink logs for source-specific errors       |
+| WebSocket closed (4014)      | Bot needs `GuildVoiceStates` intent                  |
