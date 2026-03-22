@@ -12,13 +12,13 @@ const (
 	emojiX        = "<:x_:1484598038508081293>"
 
 	// Reddit (register and replace IDs)
-	emojiReddit = "<:reddit:0000000000000000000>"
-	emojiUpvote = "<:upvote:0000000000000000000>"
+	emojiReddit = "<:reddit:1485288295884914688>"
+	emojiUpvote = "<:trend:1485288337026846770>"
 
 	// TikTok (register and replace IDs)
-	emojiTikTok = "<:tiktok:0000000000000000000>"
-	emojiPlay   = "<:play:0000000000000000000>"
-	emojiShare  = "<:share:0000000000000000000>"
+	emojiTikTok = "<:tiktok:1485288359289946223>"
+	emojiPlay   = "<:play:1485288373047263424>"
+	emojiShare  = "<:send:1485288382509875231>"
 )
 
 func formatCount(n int) string {
@@ -33,4 +33,3 @@ func formatCount(n int) string {
 		return fmt.Sprintf("%d", n)
 	}
 }
-
