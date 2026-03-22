@@ -21,7 +21,12 @@ type Module interface {
 	HandleComponent(e *events.ComponentInteractionCreate)
 	HandleModal(e *events.ModalSubmitInteractionCreate)
 	SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent
-	HandleSettingsComponent(e *events.ComponentInteractionCreate)
+}
+
+// SettingsSummarizer is optionally implemented by modules to show
+// a brief summary of their current settings in the main settings panel.
+type SettingsSummarizer interface {
+	SettingsSummary(guildID snowflake.ID) string
 }
 
 // VoiceStateListener is an optional interface that modules can implement

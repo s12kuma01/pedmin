@@ -2,6 +2,7 @@ package rss
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"time"
 
@@ -63,6 +64,14 @@ func (r *RSS) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	r.handleModal(e)
 }
 
+func (r *RSS) SettingsSummary(guildID snowflake.ID) string {
+	count, err := r.store.CountRSSFeeds(guildID)
+	if err != nil {
+		return ""
+	}
+	return fmt.Sprintf("フィード: %d/%d件", count, MaxFeedsPerGuild)
+}
+
 func (r *RSS) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	count, err := r.store.CountRSSFeeds(guildID)
 	if err != nil {
@@ -70,5 +79,3 @@ func (r *RSS) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	}
 	return BuildSettingsPanel(count)
 }
-
-func (r *RSS) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

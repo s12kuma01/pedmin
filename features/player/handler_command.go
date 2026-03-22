@@ -22,9 +22,10 @@ func (p *Player) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	p.deleteTrackedMessage(*guildID)
 
 	player := p.lavalink.Player(*guildID)
-	if player.Volume() != p.defaultVolume {
+	volume := p.getDefaultVolume(*guildID)
+	if player.Volume() != volume {
 		ctx, cancel := p.lavalinkCtx()
-		_ = player.Update(ctx, lavalink.WithVolume(p.defaultVolume))
+		_ = player.Update(ctx, lavalink.WithVolume(volume))
 		cancel()
 	}
 	queue := p.queues.Get(*guildID)

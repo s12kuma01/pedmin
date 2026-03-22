@@ -77,7 +77,7 @@ func main() {
 	urlModule := urlmod.New(cfg, logger)
 	b.Register(urlModule)
 
-	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, cfg.LavalinkTimeout, cfg.LavalinkLoadTimeout, logger)
+	playerModule := player.New(b.Lavalink, b.Client, cfg.DefaultVolume, cfg.AutoLeaveTimeout, cfg.LavalinkTimeout, cfg.LavalinkLoadTimeout, guildStore, logger)
 	player.SetupListeners(b.Lavalink, playerModule)
 	b.Register(playerModule)
 

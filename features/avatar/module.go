@@ -49,4 +49,3 @@ func (a *Avatar) HandleModal(_ *events.ModalSubmitInteractionCreate)   {}
 func (a *Avatar) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
 	return nil
 }
-func (a *Avatar) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

@@ -1,7 +1,9 @@
 package logger
 
 import (
+	"fmt"
 	"log/slog"
+	"strings"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -54,6 +56,30 @@ func (l *Logger) HandleComponent(e *events.ComponentInteractionCreate) {
 
 func (l *Logger) HandleModal(_ *events.ModalSubmitInteractionCreate) {}
 
+func (l *Logger) SettingsSummary(guildID snowflake.ID) string {
+	settings, err := LoadSettings(l.store, guildID)
+	if err != nil {
+		return ""
+	}
+	var parts []string
+	if settings.ChannelID != 0 {
+		parts = append(parts, fmt.Sprintf("ログ先: #%d", settings.ChannelID))
+	}
+	count := 0
+	for _, enabled := range settings.Events {
+		if enabled {
+			count++
+		}
+	}
+	if count > 0 {
+		parts = append(parts, fmt.Sprintf("イベント: %d個", count))
+	}
+	if len(parts) == 0 {
+		return "未設定"
+	}
+	return strings.Join(parts, ", ")
+}
+
 func (l *Logger) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	settings, err := LoadSettings(l.store, guildID)
 	if err != nil {
@@ -62,5 +88,3 @@ func (l *Logger) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	}
 	return BuildSettingsPanel(settings)
 }
-
-func (l *Logger) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

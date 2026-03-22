@@ -4,7 +4,6 @@ import (
 	"log/slog"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/module"
@@ -44,8 +43,7 @@ func (p *Panel) Commands() []discord.ApplicationCommandCreate {
 	}
 }
 
-func (p *Panel) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}
-func (p *Panel) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent       { return nil }
+func (p *Panel) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent { return nil }
 
 func (p *Panel) isAllowed(userID snowflake.ID) bool {
 	for _, id := range p.cfg.PanelAllowedUsers {

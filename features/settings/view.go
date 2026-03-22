@@ -14,6 +14,7 @@ type ModuleOption struct {
 	Name        string
 	Description string
 	Enabled     bool
+	Summary     string // optional: brief settings summary (e.g. "ログ先: #logs")
 }
 
 // BuildMainPanel builds the initial settings panel message.
@@ -33,10 +34,14 @@ func buildMainContainer(options []ModuleOption) discord.ContainerComponent {
 		if opt.Enabled {
 			status = "✅"
 		}
+		desc := opt.Description
+		if opt.Summary != "" {
+			desc = opt.Summary
+		}
 		selectOptions = append(selectOptions, discord.StringSelectMenuOption{
 			Label:       fmt.Sprintf("%s %s", status, opt.Name),
 			Value:       opt.ID,
-			Description: opt.Description,
+			Description: desc,
 		})
 	}
 

@@ -52,5 +52,3 @@ func (s *Settings) HandleModal(_ *events.ModalSubmitInteractionCreate) {}
 func (s *Settings) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
 	return nil
 }
-
-func (s *Settings) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

@@ -42,4 +42,3 @@ func (p *Ping) HandleModal(_ *events.ModalSubmitInteractionCreate)   {}
 func (p *Ping) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
 	return nil
 }
-func (p *Ping) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

@@ -7,6 +7,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/module"
 )
 
 func (s *Settings) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -49,12 +50,16 @@ func (s *Settings) listModuleOptions(guildID snowflake.ID) []ModuleOption {
 		if info.AlwaysOn {
 			continue
 		}
-		options = append(options, ModuleOption{
+		opt := ModuleOption{
 			ID:          info.ID,
 			Name:        info.Name,
 			Description: info.Description,
 			Enabled:     s.bot.IsModuleEnabled(guildID, info.ID),
-		})
+		}
+		if summarizer, ok := m.(module.SettingsSummarizer); ok {
+			opt.Summary = summarizer.SettingsSummary(guildID)
+		}
+		options = append(options, opt)
 	}
 	return options
 }

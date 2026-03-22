@@ -42,4 +42,3 @@ func (f *Fuckfetch) HandleModal(_ *events.ModalSubmitInteractionCreate)   {}
 func (f *Fuckfetch) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
 	return nil
 }
-func (f *Fuckfetch) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

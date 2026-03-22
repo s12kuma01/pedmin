@@ -1,7 +1,9 @@
 package ticket
 
 import (
+	"fmt"
 	"log/slog"
+	"strings"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
@@ -56,6 +58,24 @@ func (t *Ticket) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	t.handleModal(e)
 }
 
+func (t *Ticket) SettingsSummary(guildID snowflake.ID) string {
+	settings, err := LoadSettings(t.store, guildID)
+	if err != nil {
+		return ""
+	}
+	var parts []string
+	if settings.CategoryID != 0 {
+		parts = append(parts, fmt.Sprintf("カテゴリ: #%d", settings.CategoryID))
+	}
+	if settings.LogChannelID != 0 {
+		parts = append(parts, fmt.Sprintf("ログ: #%d", settings.LogChannelID))
+	}
+	if len(parts) == 0 {
+		return "未設定"
+	}
+	return strings.Join(parts, ", ")
+}
+
 func (t *Ticket) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	settings, err := LoadSettings(t.store, guildID)
 	if err != nil {
@@ -64,5 +84,3 @@ func (t *Ticket) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	}
 	return BuildSettingsPanel(settings)
 }
-
-func (t *Ticket) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}

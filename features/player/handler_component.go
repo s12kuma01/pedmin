@@ -3,6 +3,7 @@ package player
 import (
 	"context"
 	"log/slog"
+	"strconv"
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
@@ -10,6 +11,7 @@ import (
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
+	settingsview "github.com/s12kuma01/pedmin/features/settings"
 )
 
 func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -40,6 +42,8 @@ func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
 		p.handleBack(e, *guildID)
 	case "clear_queue":
 		p.handleClearQueue(e, *guildID)
+	case "volume":
+		p.handleVolumeSettings(e, *guildID)
 	}
 }
 
@@ -97,4 +101,24 @@ func (p *Player) respondWithPlayerUpdate(e *events.ComponentInteractionCreate, p
 	queue := p.queues.Get(guildID)
 	ui := BuildPlayerUI(player, queue)
 	_ = e.UpdateMessage(discord.NewMessageUpdateV2([]discord.LayoutComponent{ui}))
+}
+
+func (p *Player) handleVolumeSettings(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
+	data, ok := e.Data.(discord.StringSelectMenuInteractionData)
+	if !ok || len(data.Values) == 0 {
+		return
+	}
+
+	vol, err := strconv.Atoi(data.Values[0])
+	if err != nil {
+		return
+	}
+
+	settings := &PlayerSettings{DefaultVolume: &vol}
+	if err := SaveSettings(p.store, guildID, settings); err != nil {
+		p.logger.Error("failed to save player settings", slog.Any("error", err))
+	}
+
+	settingsUI := BuildSettingsPanel(vol)
+	_ = e.UpdateMessage(settingsview.BuildModulePanel(p.Info(), true, settingsUI))
 }

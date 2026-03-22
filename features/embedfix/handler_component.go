@@ -7,6 +7,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	settingsview "github.com/s12kuma01/pedmin/features/settings"
 )
 
 func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
@@ -72,7 +73,9 @@ func (ef *EmbedFix) handlePlatformSettings(e *events.ComponentInteractionCreate)
 		ef.logger.Error("failed to save embedfix settings", slog.Any("error", err))
 	}
 
-	_ = e.DeferUpdateMessage()
+	settingsUI := BuildSettingsPanel(settings)
+	enabled := ef.bot.IsModuleEnabled(*guildID, ModuleID)
+	_ = e.UpdateMessage(settingsview.BuildModulePanel(ef.Info(), enabled, settingsUI))
 }
 
 func (ef *EmbedFix) respondTranslateError(e *events.ComponentInteractionCreate, msg string) {

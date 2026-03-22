@@ -1,16 +1,17 @@
 package player
 
 import (
+	"fmt"
 	"log/slog"
 	"sync"
 	"time"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/discord"
-	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/module"
+	"github.com/s12kuma01/pedmin/store"
 )
 
 const ModuleID = "player"
@@ -23,6 +24,7 @@ type trackedMessage struct {
 type Player struct {
 	lavalink            disgolink.Client
 	client              *disgobot.Client
+	store               store.GuildStore
 	queues              *QueueManager
 	messages            sync.Map // map[snowflake.ID]trackedMessage
 	defaultVolume       int
@@ -33,10 +35,11 @@ type Player struct {
 	logger              *slog.Logger
 }
 
-func New(link disgolink.Client, client *disgobot.Client, defaultVolume int, autoLeaveTimeout, lavalinkTimeout, lavalinkLoadTimeout time.Duration, logger *slog.Logger) *Player {
+func New(link disgolink.Client, client *disgobot.Client, defaultVolume int, autoLeaveTimeout, lavalinkTimeout, lavalinkLoadTimeout time.Duration, guildStore store.GuildStore, logger *slog.Logger) *Player {
 	return &Player{
 		lavalink:            link,
 		client:              client,
+		store:               guildStore,
 		queues:              NewQueueManager(),
 		defaultVolume:       defaultVolume,
 		autoLeaveTimeout:    autoLeaveTimeout,
@@ -64,8 +67,21 @@ func (p *Player) Commands() []discord.ApplicationCommandCreate {
 	}
 }
 
-func (p *Player) SettingsPanel(_ snowflake.ID) []discord.LayoutComponent {
-	return nil
+// getDefaultVolume returns the per-guild default volume, falling back to the global config default.
+func (p *Player) getDefaultVolume(guildID snowflake.ID) int {
+	settings, err := LoadSettings(p.store, guildID)
+	if err != nil || settings.DefaultVolume == nil {
+		return p.defaultVolume
+	}
+	return *settings.DefaultVolume
 }
 
-func (p *Player) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}
+func (p *Player) SettingsSummary(guildID snowflake.ID) string {
+	vol := p.getDefaultVolume(guildID)
+	return fmt.Sprintf("デフォルト音量: %d%%", vol)
+}
+
+func (p *Player) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
+	vol := p.getDefaultVolume(guildID)
+	return BuildSettingsPanel(vol)
+}

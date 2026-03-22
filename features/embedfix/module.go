@@ -2,6 +2,7 @@ package embedfix
 
 import (
 	"log/slog"
+	"strings"
 	"time"
 
 	disgobot "github.com/disgoorg/disgo/bot"
@@ -65,6 +66,23 @@ func (ef *EmbedFix) HandleComponent(e *events.ComponentInteractionCreate) {
 
 func (ef *EmbedFix) HandleModal(_ *events.ModalSubmitInteractionCreate) {}
 
+func (ef *EmbedFix) SettingsSummary(guildID snowflake.ID) string {
+	settings, err := LoadSettings(ef.store, guildID)
+	if err != nil {
+		return ""
+	}
+	var names []string
+	for _, p := range AllPlatforms {
+		if settings.IsPlatformEnabled(p.Key) {
+			names = append(names, p.Label)
+		}
+	}
+	if len(names) == 0 {
+		return "全て無効"
+	}
+	return "対象: " + strings.Join(names, ", ")
+}
+
 func (ef *EmbedFix) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
 	settings, err := LoadSettings(ef.store, guildID)
 	if err != nil {
@@ -73,5 +91,3 @@ func (ef *EmbedFix) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponen
 	}
 	return BuildSettingsPanel(settings)
 }
-
-func (ef *EmbedFix) HandleSettingsComponent(_ *events.ComponentInteractionCreate) {}
