@@ -6,18 +6,18 @@ import (
 	"github.com/disgoorg/disgo/discord"
 )
 
-func BuildTweetEmbed(tweet *Tweet, ref tweetRef) discord.MessageCreate {
+func BuildTweetEmbed(tweet *Tweet, ref EmbedRef) discord.MessageCreate {
 	components := buildTweetComponents(tweet, ref, tweet.Text, "")
 	return discord.NewMessageCreateV2(discord.NewContainer(components...))
 }
 
-func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref tweetRef) []discord.LayoutComponent {
+func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref EmbedRef) []discord.LayoutComponent {
 	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), langName(result.DetectedLanguage))
 	components := buildTweetComponents(tweet, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
 
-func buildTweetComponents(tweet *Tweet, ref tweetRef, text, footerOverride string) []discord.ContainerSubComponent {
+func buildTweetComponents(tweet *Tweet, ref EmbedRef, text, footerOverride string) []discord.ContainerSubComponent {
 	components := []discord.ContainerSubComponent{
 		discord.NewSection(
 			discord.NewTextDisplay(fmt.Sprintf("**%s** [@%s](https://x.com/%s)", tweet.Author.Name, tweet.Author.ScreenName, tweet.Author.ScreenName)),
@@ -58,7 +58,7 @@ func buildTweetComponents(tweet *Tweet, ref tweetRef, text, footerOverride strin
 
 	// Show translate button only for non-Japanese tweets and when not already translated
 	if tweet.Lang != "ja" && footerOverride == "" {
-		customID := fmt.Sprintf("%s:translate:%s:%s", ModuleID, ref.ScreenName, ref.TweetID)
+		customID := fmt.Sprintf("%s:translate:%s:%s:%s", ModuleID, PlatformTwitter, ref.Params[0], ref.Params[1])
 		components = append(components,
 			discord.NewActionRow(
 				discord.NewSecondaryButton("🌐 翻訳", customID),

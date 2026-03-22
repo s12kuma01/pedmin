@@ -64,7 +64,7 @@ func main() {
 	loggermod.SetupListeners(b.Client, loggerModule)
 	b.Register(loggerModule)
 
-	embedfixModule := embedfix.New(b, b.Client, cfg.DeepLAPIKey, cfg.HTTPClientTimeout, logger)
+	embedfixModule := embedfix.New(b, b.Client, cfg.DeepLAPIKey, cfg.MetaAccessToken, cfg.HTTPClientTimeout, logger)
 	embedfix.SetupListeners(b.Client, embedfixModule)
 	b.Register(embedfixModule)
 

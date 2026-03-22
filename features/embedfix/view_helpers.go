@@ -5,6 +5,22 @@ import (
 	"regexp"
 )
 
+// Platform identifies which SNS a detected URL belongs to.
+type Platform string
+
+const (
+	PlatformTwitter   Platform = "twitter"
+	PlatformReddit    Platform = "reddit"
+	PlatformTikTok    Platform = "tiktok"
+	PlatformInstagram Platform = "instagram"
+)
+
+// EmbedRef represents a detected SNS URL with platform-specific parameters.
+type EmbedRef struct {
+	Platform Platform
+	Params   []string // platform-specific captured groups
+}
+
 // Application Emoji (registered in Developer Portal)
 const (
 	emojiMessages = "<:messages:1484573490400067635>"
@@ -14,24 +30,41 @@ const (
 	emojiX        = "<:x_:1484598038508081293>"
 )
 
-var tweetURLRegex = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
+var (
+	tweetURLRegex     = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
+	redditURLRegex    = regexp.MustCompile(`https?://(?:www\.|old\.|new\.)?reddit\.com/r/(\w+)/comments/(\w+)`)
+	tiktokURLRegex    = regexp.MustCompile(`https?://(?:www\.)?tiktok\.com/@([\w.]+)/video/(\d+)`)
+	instagramURLRegex = regexp.MustCompile(`https?://(?:www\.)?instagram\.com/(?:p|reel|tv)/([\w-]+)`)
+)
 
-// maxTweetURLs limits processed tweets per message to avoid response size limits.
-const maxTweetURLs = 3
+// maxEmbedURLs limits total embed URLs processed per message.
+const maxEmbedURLs = 4
 
-type tweetRef struct {
-	ScreenName string
-	TweetID    string
+type urlMatcher struct {
+	regex    *regexp.Regexp
+	platform Platform
 }
 
-func extractTweetURLs(content string) []tweetRef {
-	matches := tweetURLRegex.FindAllStringSubmatch(content, maxTweetURLs)
-	refs := make([]tweetRef, 0, len(matches))
-	for _, m := range matches {
-		refs = append(refs, tweetRef{
-			ScreenName: m[1],
-			TweetID:    m[2],
-		})
+var urlMatchers = []urlMatcher{
+	{tweetURLRegex, PlatformTwitter},
+	{redditURLRegex, PlatformReddit},
+	{tiktokURLRegex, PlatformTikTok},
+	{instagramURLRegex, PlatformInstagram},
+}
+
+func extractEmbedURLs(content string) []EmbedRef {
+	var refs []EmbedRef
+	for _, m := range urlMatchers {
+		matches := m.regex.FindAllStringSubmatch(content, maxEmbedURLs-len(refs))
+		for _, match := range matches {
+			refs = append(refs, EmbedRef{
+				Platform: m.platform,
+				Params:   match[1:], // captured groups only
+			})
+			if len(refs) >= maxEmbedURLs {
+				return refs
+			}
+		}
 	}
 	return refs
 }

@@ -13,8 +13,6 @@ import (
 
 const ModuleID = "embedfix"
 
-// TODO: Add embed replacement support for other SNS platforms (Reddit, TikTok, Instagram)
-
 type Bot interface {
 	IsModuleEnabled(guildID snowflake.ID, moduleID string) bool
 }
@@ -22,16 +20,22 @@ type Bot interface {
 type EmbedFix struct {
 	bot             Bot
 	client          *disgobot.Client
-	fxClient        *FxTwitterClient
+	twitterClient   *FxTwitterClient
+	redditClient    *RedditClient
+	tiktokClient    *TikTokClient
+	instagramClient *InstagramClient
 	translateClient *TranslateClient
 	logger          *slog.Logger
 }
 
-func New(bot Bot, client *disgobot.Client, deeplAPIKey string, timeout time.Duration, logger *slog.Logger) *EmbedFix {
+func New(bot Bot, client *disgobot.Client, deeplAPIKey string, metaAccessToken string, timeout time.Duration, logger *slog.Logger) *EmbedFix {
 	return &EmbedFix{
 		bot:             bot,
 		client:          client,
-		fxClient:        NewFxTwitterClient(timeout),
+		twitterClient:   NewFxTwitterClient(timeout),
+		redditClient:    NewRedditClient(timeout),
+		tiktokClient:    NewTikTokClient(timeout),
+		instagramClient: NewInstagramClient(metaAccessToken, timeout),
 		translateClient: NewTranslateClient(deeplAPIKey, timeout),
 		logger:          logger,
 	}
@@ -41,7 +45,7 @@ func (ef *EmbedFix) Info() module.Info {
 	return module.Info{
 		ID:          ModuleID,
 		Name:        "Embed Fix",
-		Description: "X/Twitterリンクのリッチ埋め込み表示",
+		Description: "SNSリンクのリッチ埋め込み表示",
 		AlwaysOn:    false,
 	}
 }

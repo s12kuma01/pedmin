@@ -48,7 +48,8 @@ type Config struct {
 	PanelAllowedUsers []snowflake.ID
 
 	// Embed Fix
-	DeepLAPIKey string
+	DeepLAPIKey     string
+	MetaAccessToken string
 }
 
 func Load() (*Config, error) {
@@ -116,7 +117,8 @@ func Load() (*Config, error) {
 		PanelAPIKey:       os.Getenv("PANEL_API_KEY"),
 		PanelAllowedUsers: allowedUsers,
 
-		DeepLAPIKey: os.Getenv("DEEPL_API_KEY"),
+		DeepLAPIKey:     os.Getenv("DEEPL_API_KEY"),
+		MetaAccessToken: os.Getenv("META_ACCESS_TOKEN"),
 	}
 
 	return cfg, nil
