@@ -26,12 +26,11 @@ type EmbedFix struct {
 	twitterClient   *FxTwitterClient
 	redditClient    *RedditClient
 	tiktokClient    *TikTokClient
-	instagramClient *InstagramClient
 	translateClient *TranslateClient
 	logger          *slog.Logger
 }
 
-func New(bot Bot, client *disgobot.Client, deeplAPIKey string, metaAccessToken string, timeout time.Duration, guildStore store.GuildStore, logger *slog.Logger) *EmbedFix {
+func New(bot Bot, client *disgobot.Client, deeplAPIKey string, timeout time.Duration, guildStore store.GuildStore, logger *slog.Logger) *EmbedFix {
 	return &EmbedFix{
 		bot:             bot,
 		client:          client,
@@ -39,7 +38,6 @@ func New(bot Bot, client *disgobot.Client, deeplAPIKey string, metaAccessToken s
 		twitterClient:   NewFxTwitterClient(timeout),
 		redditClient:    NewRedditClient(timeout),
 		tiktokClient:    NewTikTokClient(timeout),
-		instagramClient: NewInstagramClient(metaAccessToken, timeout),
 		translateClient: NewTranslateClient(deeplAPIKey, timeout),
 		logger:          logger,
 	}

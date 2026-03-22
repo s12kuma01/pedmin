@@ -21,18 +21,19 @@ func NewRedditClient(timeout time.Duration) *RedditClient {
 }
 
 type RedditPost struct {
-	Title       string
-	Selftext    string
-	Author      string
-	Subreddit   string
-	Score       int
-	NumComments int
-	URL         string
-	Thumbnail   string
-	IsVideo     bool
-	CreatedUTC  time.Time
-	PostHint    string // "self", "link", "image", "hosted:video", "rich:video"
-	Preview     []string
+	Title          string
+	Selftext       string
+	Author         string
+	Subreddit      string
+	SubredditIcon  string
+	Score          int
+	NumComments    int
+	URL            string
+	Thumbnail      string
+	IsVideo        bool
+	CreatedUTC     time.Time
+	PostHint       string // "self", "link", "image", "hosted:video", "rich:video"
+	Preview        []string
 }
 
 type redditListing struct {
@@ -62,10 +63,14 @@ type redditPostData struct {
 			} `json:"source"`
 		} `json:"images"`
 	} `json:"preview"`
+	SRDetail *struct {
+		IconImg     string `json:"icon_img"`
+		CommunityIcon string `json:"community_icon"`
+	} `json:"sr_detail"`
 }
 
 func (c *RedditClient) GetPost(ctx context.Context, subreddit, postID string) (*RedditPost, error) {
-	endpoint := fmt.Sprintf("https://www.reddit.com/r/%s/comments/%s.json", subreddit, postID)
+	endpoint := fmt.Sprintf("https://www.reddit.com/r/%s/comments/%s.json?sr_detail=1", subreddit, postID)
 
 	req, err := http.NewRequestWithContext(ctx, http.MethodGet, endpoint, nil)
 	if err != nil {
@@ -112,6 +117,17 @@ func (c *RedditClient) GetPost(ctx context.Context, subreddit, postID string) (*
 		IsVideo:     data.IsVideo,
 		CreatedUTC:  time.Unix(int64(data.CreatedUTC), 0),
 		PostHint:    data.PostHint,
+	}
+
+	// Extract subreddit icon
+	if data.SRDetail != nil {
+		icon := data.SRDetail.CommunityIcon
+		if icon == "" {
+			icon = data.SRDetail.IconImg
+		}
+		if icon != "" {
+			post.SubredditIcon = decodeHTMLEntities(icon)
+		}
 	}
 
 	// Extract preview images

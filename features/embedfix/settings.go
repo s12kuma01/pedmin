@@ -18,7 +18,6 @@ var AllPlatforms = []struct {
 	{PlatformTwitter, "X / Twitter"},
 	{PlatformReddit, "Reddit"},
 	{PlatformTikTok, "TikTok"},
-	{PlatformInstagram, "Instagram"},
 }
 
 func defaultSettings() *EmbedFixSettings {

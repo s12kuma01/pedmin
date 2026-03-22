@@ -50,8 +50,6 @@ func (ef *EmbedFix) processMessageURLs(ctx context.Context, e *events.GuildMessa
 			ef.processRedditEmbed(ctx, e, ref)
 		case PlatformTikTok:
 			ef.processTikTokEmbed(ctx, e, ref)
-		case PlatformInstagram:
-			ef.processInstagramEmbed(ctx, e, ref)
 		}
 	}
 }
@@ -122,31 +120,6 @@ func (ef *EmbedFix) processTikTokEmbed(ctx context.Context, e *events.GuildMessa
 	}
 }
 
-func (ef *EmbedFix) processInstagramEmbed(ctx context.Context, e *events.GuildMessageCreate, ref EmbedRef) {
-	if !ef.instagramClient.IsAvailable() {
-		return
-	}
-
-	shortcode := ref.Params[0]
-
-	post, err := ef.instagramClient.GetPost(ctx, shortcode)
-	if err != nil {
-		ef.logger.Warn("failed to fetch instagram post",
-			slog.String("shortcode", shortcode),
-			slog.Any("error", err),
-		)
-		return
-	}
-
-	msg := BuildInstagramEmbed(post, ref)
-	if _, err = ef.client.Rest.CreateMessage(e.ChannelID, msg.WithMessageReferenceByID(e.MessageID)); err != nil {
-		ef.logger.Warn("failed to send instagram embed",
-			slog.String("shortcode", shortcode),
-			slog.Any("error", err),
-		)
-	}
-}
-
 // translateContent fetches content for the given platform and translates it.
 func (ef *EmbedFix) translateContent(ctx context.Context, platform, params string) ([]discord.LayoutComponent, error) {
 	switch Platform(platform) {
@@ -156,8 +129,6 @@ func (ef *EmbedFix) translateContent(ctx context.Context, platform, params strin
 		return ef.translateRedditContent(ctx, params)
 	case PlatformTikTok:
 		return ef.translateTikTokContent(ctx, params)
-	case PlatformInstagram:
-		return ef.translateInstagramContent(ctx, params)
 	default:
 		// Backwards compatibility: old format where platform is actually screenName
 		return ef.translateTwitterContent(ctx, platform+":"+params)
@@ -220,23 +191,3 @@ func (ef *EmbedFix) translateTikTokContent(ctx context.Context, params string) (
 	return BuildTikTokEmbedTranslated(video, result, ref), nil
 }
 
-func (ef *EmbedFix) translateInstagramContent(ctx context.Context, params string) ([]discord.LayoutComponent, error) {
-	shortcode := params
-
-	post, err := ef.instagramClient.GetPost(ctx, shortcode)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch instagram post: %w", err)
-	}
-
-	if post.Title == "" {
-		return nil, fmt.Errorf("no text to translate")
-	}
-
-	result, err := ef.translateClient.Translate(ctx, post.Title, "ja")
-	if err != nil {
-		return nil, fmt.Errorf("failed to translate: %w", err)
-	}
-
-	ref := EmbedRef{Platform: PlatformInstagram, Params: []string{shortcode}}
-	return BuildInstagramEmbedTranslated(post, result, ref), nil
-}

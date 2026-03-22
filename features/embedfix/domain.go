@@ -21,8 +21,7 @@ type EmbedRef struct {
 var (
 	tweetURLRegex     = regexp.MustCompile(`https?://(?:www\.)?(?:twitter\.com|x\.com)/(\w+)/status/(\d+)`)
 	redditURLRegex    = regexp.MustCompile(`https?://(?:www\.|old\.|new\.)?reddit\.com/r/(\w+)/comments/(\w+)`)
-	tiktokURLRegex    = regexp.MustCompile(`https?://(?:www\.)?tiktok\.com/@([\w.]+)/video/(\d+)`)
-	instagramURLRegex = regexp.MustCompile(`https?://(?:www\.)?instagram\.com/(?:p|reel|tv)/([\w-]+)`)
+	tiktokURLRegex = regexp.MustCompile(`https?://(?:www\.)?tiktok\.com/@([\w.]+)/video/(\d+)`)
 )
 
 // maxEmbedURLs limits total embed URLs processed per message.
@@ -37,7 +36,6 @@ var urlMatchers = []urlMatcher{
 	{tweetURLRegex, PlatformTwitter},
 	{redditURLRegex, PlatformReddit},
 	{tiktokURLRegex, PlatformTikTok},
-	{instagramURLRegex, PlatformInstagram},
 }
 
 func extractEmbedURLs(content string) []EmbedRef {

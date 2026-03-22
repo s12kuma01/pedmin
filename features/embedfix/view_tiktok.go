@@ -12,7 +12,7 @@ func BuildTikTokEmbed(video *TikTokVideo, ref EmbedRef) discord.MessageCreate {
 }
 
 func BuildTikTokEmbedTranslated(video *TikTokVideo, result *TranslateResult, ref EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("🎵 | <t:%d:f> · %sから翻訳", video.CreatedAt.Unix(), langName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiTikTok, video.CreatedAt.Unix(), langName(result.DetectedLanguage))
 	components := buildTikTokComponents(video, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
@@ -33,25 +33,30 @@ func buildTikTokComponents(video *TikTokVideo, ref EmbedRef, translatedText, foo
 		components = append(components, discord.NewTextDisplay(video.Title))
 	}
 
-	if video.CoverURL != "" {
+	// Try video URL first (Discord may render it inline), fallback to cover image
+	mediaURL := video.CoverURL
+	if video.VideoURL != "" {
+		mediaURL = video.VideoURL
+	}
+	if mediaURL != "" {
 		components = append(components, discord.NewMediaGallery(
 			discord.MediaGalleryItem{
-				Media: discord.UnfurledMediaItem{URL: video.CoverURL},
+				Media: discord.UnfurledMediaItem{URL: mediaURL},
 			},
 		))
 	}
 
 	components = append(components, discord.NewSmallSeparator())
 
-	stats := fmt.Sprintf("▶ %s  ❤ %s  💬 %s  🔗 %s",
-		formatCount(video.PlayCount),
-		formatCount(video.LikeCount),
-		formatCount(video.CommentCount),
-		formatCount(video.ShareCount),
+	stats := fmt.Sprintf("%s %s  %s %s  %s %s  %s %s",
+		emojiPlay, formatCount(video.PlayCount),
+		emojiLike, formatCount(video.LikeCount),
+		emojiMessages, formatCount(video.CommentCount),
+		emojiShare, formatCount(video.ShareCount),
 	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("🎵 | <t:%d:f>", video.CreatedAt.Unix())
+	footer := fmt.Sprintf("%s | <t:%d:f>", emojiTikTok, video.CreatedAt.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}

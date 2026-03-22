@@ -25,6 +25,7 @@ type TikTokVideo struct {
 	Title        string
 	Author       TikTokAuthor
 	CoverURL     string
+	VideoURL     string
 	PlayCount    int
 	LikeCount    int
 	CommentCount int
@@ -45,6 +46,7 @@ type tikwmResponse struct {
 
 type tikwmData struct {
 	Title        string      `json:"title"`
+	Play         string      `json:"play"`
 	PlayCount    int         `json:"play_count"`
 	DiggCount    int         `json:"digg_count"`
 	CommentCount int         `json:"comment_count"`
@@ -102,6 +104,7 @@ func (c *TikTokClient) GetVideo(ctx context.Context, username, videoID string) (
 			Avatar:   data.Author.Avatar,
 		},
 		CoverURL:     data.OriginCover,
+		VideoURL:     data.Play,
 		PlayCount:    data.PlayCount,
 		LikeCount:    data.DiggCount,
 		CommentCount: data.CommentCount,

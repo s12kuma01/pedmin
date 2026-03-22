@@ -12,16 +12,25 @@ func BuildRedditEmbed(post *RedditPost, ref EmbedRef) discord.MessageCreate {
 }
 
 func BuildRedditEmbedTranslated(post *RedditPost, result *TranslateResult, ref EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("🔗 | <t:%d:f> · %sから翻訳", post.CreatedUTC.Unix(), langName(result.DetectedLanguage))
+	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiReddit, post.CreatedUTC.Unix(), langName(result.DetectedLanguage))
 	components := buildRedditComponents(post, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }
 
 func buildRedditComponents(post *RedditPost, ref EmbedRef, translatedText, footerOverride string) []discord.ContainerSubComponent {
-	header := fmt.Sprintf("**r/%s** · u/%s", post.Subreddit, post.Author)
+	headerText := fmt.Sprintf("**r/%s** · u/%s", post.Subreddit, post.Author)
+
+	var headerComponent discord.ContainerSubComponent
+	if post.SubredditIcon != "" {
+		headerComponent = discord.NewSection(
+			discord.NewTextDisplay(headerText),
+		).WithAccessory(discord.NewThumbnail(post.SubredditIcon))
+	} else {
+		headerComponent = discord.NewTextDisplay(headerText)
+	}
 
 	components := []discord.ContainerSubComponent{
-		discord.NewTextDisplay(header),
+		headerComponent,
 		discord.NewSmallSeparator(),
 	}
 
@@ -47,10 +56,13 @@ func buildRedditComponents(post *RedditPost, ref EmbedRef, translatedText, foote
 
 	components = append(components, discord.NewSmallSeparator())
 
-	stats := fmt.Sprintf("⬆ %s  💬 %s", formatCount(post.Score), formatCount(post.NumComments))
+	stats := fmt.Sprintf("%s %s  %s %s",
+		emojiUpvote, formatCount(post.Score),
+		emojiMessages, formatCount(post.NumComments),
+	)
 	components = append(components, discord.NewTextDisplay(stats))
 
-	footer := fmt.Sprintf("🔗 | <t:%d:f>", post.CreatedUTC.Unix())
+	footer := fmt.Sprintf("%s | <t:%d:f>", emojiReddit, post.CreatedUTC.Unix())
 	if footerOverride != "" {
 		footer = footerOverride
 	}
