@@ -8,6 +8,7 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/module"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (s *Settings) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -38,19 +39,19 @@ func (s *Settings) HandleComponent(e *events.ComponentInteractionCreate) {
 
 	case action == "back":
 		options := s.listModuleOptions(*guildID)
-		_ = e.UpdateMessage(BuildMainPanelUpdate(options))
+		_ = e.UpdateMessage(ui.BuildMainPanelUpdate(options))
 	}
 }
 
-func (s *Settings) listModuleOptions(guildID snowflake.ID) []ModuleOption {
+func (s *Settings) listModuleOptions(guildID snowflake.ID) []ui.ModuleOption {
 	modules := s.bot.GetModules()
-	var options []ModuleOption
+	var options []ui.ModuleOption
 	for _, m := range modules {
 		info := m.Info()
 		if info.AlwaysOn {
 			continue
 		}
-		opt := ModuleOption{
+		opt := ui.ModuleOption{
 			ID:          info.ID,
 			Name:        info.Name,
 			Description: info.Description,
@@ -68,11 +69,11 @@ func (s *Settings) buildModulePanel(guildID snowflake.ID, moduleID string) disco
 	modules := s.bot.GetModules()
 	m, ok := modules[moduleID]
 	if !ok {
-		return BuildModuleNotFound()
+		return ui.BuildModuleNotFound()
 	}
 
 	info := m.Info()
 	enabled := s.bot.IsModuleEnabled(guildID, moduleID)
 	settingsPanel := m.SettingsPanel(guildID)
-	return BuildModulePanel(info, enabled, settingsPanel)
+	return ui.BuildModulePanel(info, enabled, settingsPanel)
 }

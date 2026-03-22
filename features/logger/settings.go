@@ -1,8 +1,6 @@
 package logger
 
 import (
-	"encoding/json"
-
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/store"
 )
@@ -38,26 +36,20 @@ var AllEvents = []struct {
 }
 
 func LoadSettings(guildStore store.GuildStore, guildID snowflake.ID) (*LoggerSettings, error) {
-	data, err := guildStore.GetModuleSettings(guildID, ModuleID)
+	s, err := store.LoadModuleSettings(guildStore, guildID, ModuleID, func() *LoggerSettings {
+		return &LoggerSettings{Events: make(map[string]bool)}
+	})
 	if err != nil {
 		return nil, err
-	}
-	var s LoggerSettings
-	if err := json.Unmarshal([]byte(data), &s); err != nil {
-		return &LoggerSettings{Events: make(map[string]bool)}, nil
 	}
 	if s.Events == nil {
 		s.Events = make(map[string]bool)
 	}
-	return &s, nil
+	return s, nil
 }
 
 func SaveSettings(guildStore store.GuildStore, guildID snowflake.ID, settings *LoggerSettings) error {
-	data, err := json.Marshal(settings)
-	if err != nil {
-		return err
-	}
-	return guildStore.SetModuleSettings(guildID, ModuleID, string(data))
+	return store.SaveModuleSettings(guildStore, guildID, ModuleID, settings)
 }
 
 func (s *LoggerSettings) IsEventEnabled(event string) bool {

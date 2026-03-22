@@ -34,34 +34,3 @@ func formatCount(n int) string {
 	}
 }
 
-var langNames = map[string]string{
-	"en": "英語",
-	"es": "スペイン語",
-	"fr": "フランス語",
-	"de": "ドイツ語",
-	"it": "イタリア語",
-	"pt": "ポルトガル語",
-	"ru": "ロシア語",
-	"ko": "韓国語",
-	"zh": "中国語",
-	"ar": "アラビア語",
-	"hi": "ヒンディー語",
-	"th": "タイ語",
-	"vi": "ベトナム語",
-	"id": "インドネシア語",
-	"tr": "トルコ語",
-	"nl": "オランダ語",
-	"pl": "ポーランド語",
-	"sv": "スウェーデン語",
-	"da": "デンマーク語",
-	"fi": "フィンランド語",
-	"no": "ノルウェー語",
-	"uk": "ウクライナ語",
-}
-
-func langName(code string) string {
-	if name, ok := langNames[code]; ok {
-		return name
-	}
-	return code
-}

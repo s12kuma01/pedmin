@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
+	"github.com/s12kuma01/pedmin/deepl"
 )
 
 func BuildTikTokEmbed(video *TikTokVideo, ref EmbedRef) discord.MessageCreate {
@@ -11,8 +12,8 @@ func BuildTikTokEmbed(video *TikTokVideo, ref EmbedRef) discord.MessageCreate {
 	return discord.NewMessageCreateV2(discord.NewContainer(components...))
 }
 
-func BuildTikTokEmbedTranslated(video *TikTokVideo, result *TranslateResult, ref EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiTikTok, video.CreatedAt.Unix(), langName(result.DetectedLanguage))
+func BuildTikTokEmbedTranslated(video *TikTokVideo, result *deepl.TranslateResult, ref EmbedRef) []discord.LayoutComponent {
+	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiTikTok, video.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
 	components := buildTikTokComponents(video, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }

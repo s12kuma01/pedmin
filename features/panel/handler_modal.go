@@ -6,11 +6,12 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
 	if !p.isAllowed(e.User().ID) {
-		_ = e.CreateMessage(ephemeralError("このコマンドを使用する権限がありません。"))
+		_ = e.CreateMessage(ui.ErrorMessage("このコマンドを使用する権限がありません。"))
 		return
 	}
 
@@ -24,7 +25,7 @@ func (p *Panel) HandleModal(e *events.ModalSubmitInteractionCreate) {
 
 	command := strings.TrimSpace(e.Data.Text(ModuleID + ":cmd"))
 	if command == "" {
-		_ = e.CreateMessage(ephemeralError("コマンドを入力してください。"))
+		_ = e.CreateMessage(ui.ErrorMessage("コマンドを入力してください。"))
 		return
 	}
 

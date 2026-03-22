@@ -11,7 +11,7 @@ import (
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
-	settingsview "github.com/s12kuma01/pedmin/features/settings"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Player) HandleComponent(e *events.ComponentInteractionCreate) {
@@ -120,5 +120,5 @@ func (p *Player) handleVolumeSettings(e *events.ComponentInteractionCreate, guil
 	}
 
 	settingsUI := BuildSettingsPanel(vol)
-	_ = e.UpdateMessage(settingsview.BuildModulePanel(p.Info(), true, settingsUI))
+	_ = e.UpdateMessage(ui.BuildModulePanel(p.Info(), true, settingsUI))
 }

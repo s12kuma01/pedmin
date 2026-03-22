@@ -9,6 +9,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/deepl"
 	"github.com/s12kuma01/pedmin/module"
 	"github.com/s12kuma01/pedmin/store"
 )
@@ -26,7 +27,7 @@ type EmbedFix struct {
 	twitterClient   *FxTwitterClient
 	redditClient    *RedditClient
 	tiktokClient    *TikTokClient
-	translateClient *TranslateClient
+	translateClient *deepl.TranslateClient
 	logger          *slog.Logger
 }
 
@@ -38,7 +39,7 @@ func New(bot Bot, client *disgobot.Client, deeplAPIKey string, timeout time.Dura
 		twitterClient:   NewFxTwitterClient(timeout),
 		redditClient:    NewRedditClient(timeout),
 		tiktokClient:    NewTikTokClient(timeout),
-		translateClient: NewTranslateClient(deeplAPIKey, timeout),
+		translateClient: deepl.NewTranslateClient(deeplAPIKey, timeout),
 		logger:          logger,
 	}
 }

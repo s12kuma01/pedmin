@@ -6,6 +6,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func buildAttachmentComponents(attachments []discord.Attachment) []discord.ContainerSubComponent {
@@ -18,7 +19,7 @@ func buildAttachmentComponents(attachments []discord.Attachment) []discord.Conta
 				Media: discord.UnfurledMediaItem{URL: a.URL},
 			})
 		} else {
-			size := formatFileSize(a.Size)
+			size := ui.FormatBytes(uint64(a.Size))
 			files = append(files, fmt.Sprintf("📎 %s (%s)", a.Filename, size))
 		}
 	}
@@ -33,16 +34,6 @@ func buildAttachmentComponents(attachments []discord.Attachment) []discord.Conta
 	return components
 }
 
-func formatFileSize(bytes int) string {
-	switch {
-	case bytes >= 1024*1024:
-		return fmt.Sprintf("%.1f MB", float64(bytes)/(1024*1024))
-	case bytes >= 1024:
-		return fmt.Sprintf("%.1f KB", float64(bytes)/1024)
-	default:
-		return fmt.Sprintf("%d B", bytes)
-	}
-}
 
 func diffAttachments(old, new []discord.Attachment) (removed, added []discord.Attachment) {
 	oldIDs := make(map[snowflake.ID]discord.Attachment, len(old))

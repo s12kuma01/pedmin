@@ -4,6 +4,7 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
+	"github.com/s12kuma01/pedmin/deepl"
 )
 
 func BuildTweetEmbed(tweet *Tweet, ref EmbedRef) discord.MessageCreate {
@@ -11,8 +12,8 @@ func BuildTweetEmbed(tweet *Tweet, ref EmbedRef) discord.MessageCreate {
 	return discord.NewMessageCreateV2(discord.NewContainer(components...))
 }
 
-func BuildTweetEmbedTranslated(tweet *Tweet, result *TranslateResult, ref EmbedRef) []discord.LayoutComponent {
-	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), langName(result.DetectedLanguage))
+func BuildTweetEmbedTranslated(tweet *Tweet, result *deepl.TranslateResult, ref EmbedRef) []discord.LayoutComponent {
+	footer := fmt.Sprintf("%s | <t:%d:f> · %sから翻訳", emojiX, tweet.CreatedAt.Unix(), deepl.LangName(result.DetectedLanguage))
 	components := buildTweetComponents(tweet, ref, result.TranslatedText, footer)
 	return []discord.LayoutComponent{discord.NewContainer(components...)}
 }

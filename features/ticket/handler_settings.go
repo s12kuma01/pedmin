@@ -6,7 +6,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
-	settingsview "github.com/s12kuma01/pedmin/features/settings"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (t *Ticket) handleCategorySelect(e *events.ComponentInteractionCreate, guildID snowflake.ID) {
@@ -74,5 +74,5 @@ func (t *Ticket) refreshSettingsPanel(e *events.ComponentInteractionCreate, guil
 	}
 	settingsUI := BuildSettingsPanel(settings)
 	enabled := t.bot.IsModuleEnabled(guildID, ModuleID)
-	_ = e.UpdateMessage(settingsview.BuildModulePanel(t.Info(), enabled, settingsUI))
+	_ = e.UpdateMessage(ui.BuildModulePanel(t.Info(), enabled, settingsUI))
 }

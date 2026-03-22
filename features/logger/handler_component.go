@@ -7,7 +7,7 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
-	settingsview "github.com/s12kuma01/pedmin/features/settings"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (l *Logger) handleComponent(e *events.ComponentInteractionCreate) {
@@ -61,5 +61,5 @@ func (l *Logger) handleComponent(e *events.ComponentInteractionCreate) {
 func (l *Logger) refreshSettingsPanel(e *events.ComponentInteractionCreate, guildID snowflake.ID, settings *LoggerSettings) {
 	settingsUI := BuildSettingsPanel(settings)
 	enabled := l.bot.IsModuleEnabled(guildID, ModuleID)
-	_ = e.UpdateMessage(settingsview.BuildModulePanel(l.Info(), enabled, settingsUI))
+	_ = e.UpdateMessage(ui.BuildModulePanel(l.Info(), enabled, settingsUI))
 }

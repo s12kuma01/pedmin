@@ -5,10 +5,11 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/deepl"
 )
 
 func BuildTranslationEmbed(translatedText string, sourceLang, targetLang string, authorID snowflake.ID, messageID snowflake.ID) discord.MessageCreate {
-	header := fmt.Sprintf("🌐 **翻訳** (%s → %s)", langName(sourceLang), langName(targetLang))
+	header := fmt.Sprintf("🌐 **翻訳** (%s → %s)", deepl.LangName(sourceLang), deepl.LangName(targetLang))
 
 	components := []discord.ContainerSubComponent{
 		discord.NewTextDisplay(header),

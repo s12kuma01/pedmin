@@ -5,8 +5,13 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
+	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/ui"
 )
+
+func (b *Bot) isModuleDisabledForGuild(guildID *snowflake.ID, moduleID string) bool {
+	return guildID != nil && !b.IsModuleEnabled(*guildID, moduleID)
+}
 
 func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate) {
 	cmdName := e.SlashCommandInteractionData().CommandName()
@@ -14,8 +19,7 @@ func (b *Bot) onCommandInteraction(e *events.ApplicationCommandInteractionCreate
 	for _, m := range b.modules {
 		for _, cmd := range m.Commands() {
 			if cmd.CommandName() == cmdName {
-				guildID := e.GuildID()
-				if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
+				if b.isModuleDisabledForGuild(e.GuildID(), m.Info().ID) {
 					_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
 					return
 				}
@@ -37,8 +41,7 @@ func (b *Bot) onComponentInteraction(e *events.ComponentInteractionCreate) {
 		return
 	}
 
-	guildID := e.GuildID()
-	if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
+	if b.isModuleDisabledForGuild(e.GuildID(), m.Info().ID) {
 		_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
 		return
 	}
@@ -56,8 +59,7 @@ func (b *Bot) onModalSubmit(e *events.ModalSubmitInteractionCreate) {
 		return
 	}
 
-	guildID := e.GuildID()
-	if guildID != nil && !b.IsModuleEnabled(*guildID, m.Info().ID) {
+	if b.isModuleDisabledForGuild(e.GuildID(), m.Info().ID) {
 		_ = e.CreateMessage(ui.ErrorMessage("このモジュールは現在無効です。"))
 		return
 	}

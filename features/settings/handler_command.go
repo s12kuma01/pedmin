@@ -13,5 +13,5 @@ func (s *Settings) HandleCommand(e *events.ApplicationCommandInteractionCreate) 
 	}
 
 	options := s.listModuleOptions(*guildID)
-	_ = e.CreateMessage(BuildMainPanel(options))
+	_ = e.CreateMessage(ui.BuildMainPanel(options))
 }

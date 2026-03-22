@@ -7,11 +7,12 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Panel) HandleComponent(e *events.ComponentInteractionCreate) {
 	if !p.isAllowed(e.User().ID) {
-		_ = e.CreateMessage(ephemeralError("このコマンドを使用する権限がありません。"))
+		_ = e.CreateMessage(ui.ErrorMessage("このコマンドを使用する権限がありません。"))
 		return
 	}
 

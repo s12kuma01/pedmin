@@ -1,4 +1,5 @@
-package embedfix
+// Package deepl provides a client for the DeepL translation API.
+package deepl
 
 import (
 	"context"
@@ -24,9 +25,15 @@ func NewTranslateClient(apiKey string, timeout time.Duration) *TranslateClient {
 	}
 }
 
+// IsAvailable reports whether the client has a configured API key.
+func (c *TranslateClient) IsAvailable() bool {
+	return c.apiKey != ""
+}
+
+// TranslateResult holds a single translation response.
 type TranslateResult struct {
 	TranslatedText   string
-	DetectedLanguage string
+	DetectedLanguage string // uppercase, e.g. "EN", "JA"
 }
 
 type deeplResponse struct {
@@ -78,6 +85,6 @@ func (c *TranslateClient) Translate(ctx context.Context, text, targetLang string
 	t := dResp.Translations[0]
 	return &TranslateResult{
 		TranslatedText:   t.Text,
-		DetectedLanguage: strings.ToLower(t.DetectedSourceLang),
+		DetectedLanguage: strings.ToUpper(t.DetectedSourceLang),
 	}, nil
 }

@@ -36,17 +36,26 @@ type RSSFeed struct {
 	AddedAt   time.Time
 }
 
-type GuildStore interface {
+// SettingsStore handles guild-level module configuration.
+type SettingsStore interface {
 	Get(guildID snowflake.ID) (*GuildSettings, error)
 	Save(settings *GuildSettings) error
 	IsModuleEnabled(guildID snowflake.ID, moduleID string) (bool, error)
 	SetModuleEnabled(guildID snowflake.ID, moduleID string, enabled bool) error
 	GetModuleSettings(guildID snowflake.ID, moduleID string) (string, error)
 	SetModuleSettings(guildID snowflake.ID, moduleID string, settings string) error
+}
+
+// TicketStore handles ticket persistence.
+type TicketStore interface {
 	CreateTicket(guildID snowflake.ID, number int, channelID, userID snowflake.ID, subject string) error
 	GetTicketByChannel(channelID snowflake.ID) (*Ticket, error)
 	CloseTicket(channelID snowflake.ID, closedBy snowflake.ID) error
 	DeleteTicket(channelID snowflake.ID) error
+}
+
+// RSSStore handles RSS feed and seen-item persistence.
+type RSSStore interface {
 	CreateRSSFeed(feed *RSSFeed) error
 	DeleteRSSFeed(id int64, guildID snowflake.ID) error
 	GetRSSFeeds(guildID snowflake.ID) ([]RSSFeed, error)
@@ -55,5 +64,12 @@ type GuildStore interface {
 	IsItemSeen(feedID int64, itemHash string) (bool, error)
 	MarkItemsSeen(feedID int64, itemHashes []string) error
 	PruneSeenItems(olderThan time.Time) error
+}
+
+// GuildStore is the composite persistence interface embedding all domain stores.
+type GuildStore interface {
+	SettingsStore
+	TicketStore
+	RSSStore
 	Close() error
 }

@@ -7,7 +7,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	settingsview "github.com/s12kuma01/pedmin/features/settings"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
@@ -26,7 +26,7 @@ func (ef *EmbedFix) handleComponent(e *events.ComponentInteractionCreate) {
 func (ef *EmbedFix) handleTranslate(e *events.ComponentInteractionCreate, rest string) {
 	_ = e.DeferUpdateMessage()
 
-	if ef.translateClient.apiKey == "" {
+	if !ef.translateClient.IsAvailable() {
 		ef.respondTranslateError(e, "翻訳APIキーが設定されていないため、翻訳できません。")
 		return
 	}
@@ -75,7 +75,7 @@ func (ef *EmbedFix) handlePlatformSettings(e *events.ComponentInteractionCreate)
 
 	settingsUI := BuildSettingsPanel(settings)
 	enabled := ef.bot.IsModuleEnabled(*guildID, ModuleID)
-	_ = e.UpdateMessage(settingsview.BuildModulePanel(ef.Info(), enabled, settingsUI))
+	_ = e.UpdateMessage(ui.BuildModulePanel(ef.Info(), enabled, settingsUI))
 }
 
 func (ef *EmbedFix) respondTranslateError(e *events.ComponentInteractionCreate, msg string) {

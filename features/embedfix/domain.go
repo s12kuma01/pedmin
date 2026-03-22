@@ -8,8 +8,7 @@ type Platform string
 const (
 	PlatformTwitter   Platform = "twitter"
 	PlatformReddit    Platform = "reddit"
-	PlatformTikTok    Platform = "tiktok"
-	PlatformInstagram Platform = "instagram"
+	PlatformTikTok Platform = "tiktok"
 )
 
 // EmbedRef represents a detected SNS URL with platform-specific parameters.

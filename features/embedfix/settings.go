@@ -1,8 +1,6 @@
 package embedfix
 
 import (
-	"encoding/json"
-
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/s12kuma01/pedmin/store"
 )
@@ -37,24 +35,16 @@ func (s *EmbedFixSettings) IsPlatformEnabled(p Platform) bool {
 }
 
 func LoadSettings(gs store.GuildStore, guildID snowflake.ID) (*EmbedFixSettings, error) {
-	data, err := gs.GetModuleSettings(guildID, ModuleID)
+	s, err := store.LoadModuleSettings(gs, guildID, ModuleID, defaultSettings)
 	if err != nil {
 		return nil, err
-	}
-	var s EmbedFixSettings
-	if err := json.Unmarshal([]byte(data), &s); err != nil {
-		return defaultSettings(), nil
 	}
 	if s.Platforms == nil {
 		return defaultSettings(), nil
 	}
-	return &s, nil
+	return s, nil
 }
 
 func SaveSettings(gs store.GuildStore, guildID snowflake.ID, settings *EmbedFixSettings) error {
-	data, err := json.Marshal(settings)
-	if err != nil {
-		return err
-	}
-	return gs.SetModuleSettings(guildID, ModuleID, string(data))
+	return store.SaveModuleSettings(gs, guildID, ModuleID, settings)
 }

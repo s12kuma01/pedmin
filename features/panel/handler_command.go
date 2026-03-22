@@ -6,18 +6,19 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/ui"
 )
 
 func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 	userID := e.User().ID
 
 	if !p.isAllowed(userID) {
-		_ = e.CreateMessage(ephemeralError("このコマンドを使用する権限がありません。"))
+		_ = e.CreateMessage(ui.ErrorMessage("このコマンドを使用する権限がありません。"))
 		return
 	}
 
 	if p.cfg.PanelURL == "" || p.cfg.PanelAPIKey == "" {
-		_ = e.CreateMessage(ephemeralError("パネルが設定されていません。"))
+		_ = e.CreateMessage(ui.ErrorMessage("パネルが設定されていません。"))
 		return
 	}
 
@@ -35,12 +36,4 @@ func (p *Panel) HandleCommand(e *events.ApplicationCommandInteractionCreate) {
 
 	msg := BuildServerList(servers)
 	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2(msg.Components))
-}
-
-func ephemeralError(text string) discord.MessageCreate {
-	return discord.NewMessageCreateV2(
-		discord.NewContainer(
-			discord.NewTextDisplay(text),
-		),
-	).WithEphemeral(true)
 }
