@@ -62,17 +62,8 @@ internal/
 └── ui/                  # 共有 UI ヘルパー
 ```
 
-詳細は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照。
-
-## ドキュメント
-
+詳細は [docs/ARCHITECTURE.md](docs/ja_jp/ARCHITECTURE.md) を参照。
 [`docs/`](docs/) ディレクトリに詳細ガイドがあります:
-
-- [Architecture](docs/ARCHITECTURE.md) — Standard Go レイヤードアーキテクチャ設計
-- [Module Development](docs/MODULE_GUIDE.md) — モジュール作成ガイド
-- [Components V2](docs/COMPONENTS_V2.md) — disgo V2 コンポーネントリファレンス
-- [Lavalink Integration](docs/LAVALINK.md) — 音楽再生セットアップ
-- [Data Store](docs/STORE.md) — SQLite データ永続化
 
 ## ライセンス
 

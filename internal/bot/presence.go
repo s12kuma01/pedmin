@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/disgoorg/disgo/gateway"
+	"github.com/s12kuma01/pedmin/config"
 	"github.com/shirou/gopsutil/v4/process"
 )
 
@@ -23,7 +24,7 @@ func (b *Bot) startPresenceUpdater(ctx context.Context) {
 
 	b.updatePresence(ctx, proc)
 
-	ticker := time.NewTicker(b.Cfg.PresenceInterval)
+	ticker := time.NewTicker(config.DefaultPresenceInterval)
 	defer ticker.Stop()
 
 	for {

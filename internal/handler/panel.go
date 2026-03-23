@@ -69,7 +69,7 @@ func (h *PanelHandler) HandleCommand(e *events.ApplicationCommandInteractionCrea
 
 	_ = e.DeferCreateMessage(false)
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.HTTPClientTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultHTTPClientTimeout)
 	defer cancel()
 
 	servers, err := h.service.ListServersWithStatus(ctx)

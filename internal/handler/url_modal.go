@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/internal/model"
 	"github.com/s12kuma01/pedmin/internal/service"
 	"github.com/s12kuma01/pedmin/internal/view"
@@ -38,7 +39,7 @@ func (h *URLHandler) handleShortenModal(e *events.ModalSubmitInteractionCreate) 
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.ShortenTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultShortenTimeout)
 	defer cancel()
 
 	shortURL, err := h.service.Shorten(ctx, rawURL)
@@ -65,7 +66,7 @@ func (h *URLHandler) handleCheckModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.ScanTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultScanTimeout)
 	defer cancel()
 
 	result, err := h.service.Check(ctx, rawURL)

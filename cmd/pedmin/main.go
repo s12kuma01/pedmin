@@ -70,10 +70,10 @@ func main() {
 
 	// --- Embed Fix ---
 
-	twitterClient := client.NewFxTwitterClient(cfg.HTTPClientTimeout)
-	redditClient := client.NewRedditClient(cfg.HTTPClientTimeout)
-	tiktokClient := client.NewTikTokClient(cfg.HTTPClientTimeout)
-	deeplClient := deepl.NewTranslateClient(cfg.DeepLAPIKey, cfg.HTTPClientTimeout)
+	twitterClient := client.NewFxTwitterClient(config.DefaultHTTPClientTimeout)
+	redditClient := client.NewRedditClient(config.DefaultHTTPClientTimeout)
+	tiktokClient := client.NewTikTokClient(config.DefaultHTTPClientTimeout)
+	deeplClient := deepl.NewTranslateClient(cfg.DeepLAPIKey, config.DefaultHTTPClientTimeout)
 
 	embedfixSvc := service.NewEmbedFixService(
 		guildStore, twitterClient, redditClient, tiktokClient,
@@ -85,20 +85,20 @@ func main() {
 
 	// --- Translator ---
 
-	translatorHandler := handler.NewTranslatorHandler(b, b.Client, cfg.DeepLAPIKey, cfg.HTTPClientTimeout, logger)
+	translatorHandler := handler.NewTranslatorHandler(b, b.Client, cfg.DeepLAPIKey, config.DefaultHTTPClientTimeout, logger)
 	handler.SetupTranslatorListeners(b.Client, translatorHandler)
 	b.Register(translatorHandler)
 
 	// --- RSS ---
 
 	rssSvc := service.NewRSSService(guildStore, b.Client, logger)
-	rssHandler := handler.NewRSSHandler(rssSvc, cfg.RSSFeedTimeout, logger)
+	rssHandler := handler.NewRSSHandler(rssSvc, config.DefaultRSSFeedTimeout, logger)
 	b.Register(rssHandler)
-	rssPoller := service.NewRSSPoller(b, rssSvc, guildStore, cfg.RSSPollInterval, logger)
+	rssPoller := service.NewRSSPoller(b, rssSvc, guildStore, config.DefaultRSSPollInterval, logger)
 
 	// --- Panel ---
 
-	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, cfg.PanelPowerActionTimeout)
+	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, config.DefaultPanelPowerTimeout)
 	panelSvc := service.NewPanelService(panelClient)
 	panelHandler := handler.NewPanelHandler(cfg, panelSvc, logger)
 	b.Register(panelHandler)
@@ -112,8 +112,8 @@ func main() {
 
 	playerSvc := service.NewPlayerService(
 		b.Lavalink, b.Client,
-		cfg.DefaultVolume, cfg.AutoLeaveTimeout,
-		cfg.LavalinkTimeout, cfg.LavalinkLoadTimeout,
+		config.DefaultVolume, config.DefaultAutoLeaveTimeout,
+		config.DefaultLavalinkTimeout, config.DefaultLavalinkLoadTimeout,
 		guildStore, logger,
 	)
 	service.SetupPlayerListeners(b.Lavalink, playerSvc)

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/internal/model"
 	"github.com/s12kuma01/pedmin/internal/ui"
 	"github.com/s12kuma01/pedmin/internal/view"
@@ -36,7 +37,7 @@ func (h *PanelHandler) HandleModal(e *events.ModalSubmitInteractionCreate) {
 
 	_ = e.DeferCreateMessage(true)
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.HTTPClientTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultHTTPClientTimeout)
 	defer cancel()
 
 	if err := h.service.SendConsoleCommand(ctx, identifier, command); err != nil {

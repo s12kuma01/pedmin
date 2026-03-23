@@ -3,7 +3,6 @@ module github.com/s12kuma01/pedmin
 go 1.26.1
 
 require (
-	github.com/BurntSushi/toml v1.6.0
 	github.com/disgoorg/disgo v0.19.2
 	github.com/disgoorg/disgolink/v3 v3.1.0
 	github.com/disgoorg/omit v1.0.0

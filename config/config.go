@@ -1,59 +1,48 @@
 // opyright (c) 2025-2026 s12kuma01
 // SPDX-License-Identifier: MPL-2.0
 
-// Package config loads application configuration from environment variables and TOML files.
+// Package config loads application configuration from environment variables.
 package config
 
 import (
 	"fmt"
 	"log/slog"
 	"os"
-	"time"
+	"path/filepath"
+	"strconv"
+	"strings"
 
-	"github.com/BurntSushi/toml"
 	"github.com/disgoorg/snowflake/v2"
 )
 
+// Config holds all application configuration loaded from environment variables.
 type Config struct {
-	// env (secrets)
+	// Discord
 	Token string
 	AppID snowflake.ID
 
-	// TOML (app settings)
+	// Lavalink
 	LavalinkHost     string
 	LavalinkPassword string
-	DataDir          string
-	DBPath           string
-	DefaultVolume    int
-	AutoLeaveTimeout time.Duration
-	PresenceInterval time.Duration
-	LogLevel         slog.Level
 
-	// Timeouts
-	LavalinkTimeout         time.Duration
-	LavalinkLoadTimeout     time.Duration
-	HTTPClientTimeout       time.Duration
-	PanelPowerActionTimeout time.Duration
+	// Storage
+	DBPath string
 
-	// RSS
-	RSSPollInterval time.Duration
-	RSSFeedTimeout  time.Duration
-
-	// URL Tools
-	XGDAPIKey      string
-	VTAPIKey       string
-	ShortenTimeout time.Duration
-	ScanTimeout    time.Duration
+	// API Keys
+	DeepLAPIKey string
+	XGDAPIKey   string
+	VTAPIKey    string
+	PanelAPIKey string
 
 	// Panel (Pelican)
 	PanelURL          string
-	PanelAPIKey       string
 	PanelAllowedUsers []snowflake.ID
 
-	// Embed Fix
-	DeepLAPIKey string
+	// Logging
+	LogLevel slog.Level
 }
 
+// Load reads configuration from environment variables.
 func Load() (*Config, error) {
 	token := os.Getenv("DISCORD_TOKEN")
 	if token == "" {
@@ -69,64 +58,39 @@ func Load() (*Config, error) {
 		return nil, fmt.Errorf("invalid DISCORD_APP_ID: %w", err)
 	}
 
-	configPath := os.Getenv("CONFIG_PATH")
-	if configPath == "" {
-		configPath = "./config.toml"
-	}
-
-	tc := defaultTOMLConfig()
-	if _, err := toml.DecodeFile(configPath, &tc); err != nil {
-		return nil, fmt.Errorf("failed to load config file %s: %w", configPath, err)
-	}
-
-	tc.fillDefaults()
-
-	if err := tc.validate(); err != nil {
-		return nil, err
-	}
-
-	allowedUsers := make([]snowflake.ID, len(tc.Panel.AllowedUsers))
-	for i, id := range tc.Panel.AllowedUsers {
-		allowedUsers[i] = snowflake.ID(id)
+	dataDir := envOrDefault("DATA_DIR", "./data")
+	dbPath := os.Getenv("DB_PATH")
+	if dbPath == "" {
+		dbPath = filepath.Join(dataDir, "pedmin.db")
 	}
 
 	cfg := &Config{
 		Token:            token,
 		AppID:            appID,
-		LavalinkHost:     tc.Lavalink.Host,
-		LavalinkPassword: tc.Lavalink.Password,
-		DataDir:          tc.Storage.DataDir,
-		DBPath:           tc.Storage.DBPath,
-		DefaultVolume:    tc.Player.DefaultVolume,
-		AutoLeaveTimeout: time.Duration(tc.Player.AutoLeaveTimeout) * time.Second,
-		PresenceInterval: time.Duration(tc.Presence.Interval) * time.Second,
-		LogLevel:         parseSlogLevel(tc.LogLevel),
-
-		LavalinkTimeout:         time.Duration(tc.Timeouts.Lavalink) * time.Second,
-		LavalinkLoadTimeout:     time.Duration(tc.Timeouts.LavalinkLoad) * time.Second,
-		HTTPClientTimeout:       time.Duration(tc.Timeouts.HTTPClient) * time.Second,
-		PanelPowerActionTimeout: time.Duration(tc.Timeouts.PanelPowerAction) * time.Second,
-
-		RSSPollInterval: time.Duration(tc.RSS.PollInterval) * time.Second,
-		RSSFeedTimeout:  time.Duration(tc.RSS.FeedTimeout) * time.Second,
-
-		XGDAPIKey:      os.Getenv("XGD_API_KEY"),
-		VTAPIKey:       os.Getenv("VT_API_KEY"),
-		ShortenTimeout: time.Duration(tc.URL.ShortenTimeout) * time.Second,
-		ScanTimeout:    time.Duration(tc.URL.ScanTimeout) * time.Second,
-
-		PanelURL:          tc.Panel.URL,
-		PanelAPIKey:       os.Getenv("PANEL_API_KEY"),
-		PanelAllowedUsers: allowedUsers,
-
-		DeepLAPIKey: os.Getenv("DEEPL_API_KEY"),
+		LavalinkHost:     envOrDefault("LAVALINK_HOST", "lavalink:2333"),
+		LavalinkPassword: envOrDefault("LAVALINK_PASSWORD", "youshallnotpass"),
+		DBPath:           dbPath,
+		DeepLAPIKey:      os.Getenv("DEEPL_API_KEY"),
+		XGDAPIKey:        os.Getenv("XGD_API_KEY"),
+		VTAPIKey:         os.Getenv("VT_API_KEY"),
+		PanelAPIKey:      os.Getenv("PANEL_API_KEY"),
+		PanelURL:         os.Getenv("PANEL_URL"),
+		PanelAllowedUsers: parseSnowflakeList(os.Getenv("PANEL_ALLOWED_USERS")),
+		LogLevel:         parseSlogLevel(envOrDefault("LOG_LEVEL", "info")),
 	}
 
 	return cfg, nil
 }
 
+func envOrDefault(key, fallback string) string {
+	if v := os.Getenv(key); v != "" {
+		return v
+	}
+	return fallback
+}
+
 func parseSlogLevel(s string) slog.Level {
-	switch s {
+	switch strings.ToLower(s) {
 	case "debug":
 		return slog.LevelDebug
 	case "warn":
@@ -136,4 +100,24 @@ func parseSlogLevel(s string) slog.Level {
 	default:
 		return slog.LevelInfo
 	}
+}
+
+func parseSnowflakeList(s string) []snowflake.ID {
+	if s == "" {
+		return nil
+	}
+	parts := strings.Split(s, ",")
+	var ids []snowflake.ID
+	for _, p := range parts {
+		p = strings.TrimSpace(p)
+		if p == "" {
+			continue
+		}
+		n, err := strconv.ParseInt(p, 10, 64)
+		if err != nil {
+			continue
+		}
+		ids = append(ids, snowflake.ID(n))
+	}
+	return ids
 }

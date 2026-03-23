@@ -8,6 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/internal/module"
 )
 
@@ -19,13 +20,13 @@ func (b *Bot) onVoiceStateUpdate(e *events.GuildVoiceStateUpdate) {
 	if e.VoiceState.UserID != b.Client.ApplicationID {
 		return
 	}
-	ctx, cancel := context.WithTimeout(context.Background(), b.Cfg.LavalinkTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultLavalinkTimeout)
 	defer cancel()
 	b.Lavalink.OnVoiceStateUpdate(ctx, e.VoiceState.GuildID, e.VoiceState.ChannelID, e.VoiceState.SessionID)
 }
 
 func (b *Bot) onVoiceServerUpdate(e *events.VoiceServerUpdate) {
-	ctx, cancel := context.WithTimeout(context.Background(), b.Cfg.LavalinkTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultLavalinkTimeout)
 	defer cancel()
 	b.Lavalink.OnVoiceServerUpdate(ctx, e.GuildID, e.Token, *e.Endpoint)
 }

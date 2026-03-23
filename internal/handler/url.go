@@ -26,7 +26,7 @@ type URLHandler struct {
 
 // NewURLHandler creates a new URLHandler.
 func NewURLHandler(cfg *config.Config, logger *slog.Logger) *URLHandler {
-	urlClient := client.NewURLClient(cfg.XGDAPIKey, cfg.VTAPIKey, cfg.HTTPClientTimeout)
+	urlClient := client.NewURLClient(cfg.XGDAPIKey, cfg.VTAPIKey, config.DefaultHTTPClientTimeout)
 	return &URLHandler{
 		cfg:     cfg,
 		service: service.NewURLService(urlClient),

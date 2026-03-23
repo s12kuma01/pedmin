@@ -10,6 +10,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/config"
 	"github.com/s12kuma01/pedmin/internal/ui"
 	"github.com/s12kuma01/pedmin/internal/view"
 )
@@ -53,7 +54,7 @@ func (h *PanelHandler) panelHandleSelect(e *events.ComponentInteractionCreate) {
 
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.HTTPClientTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultHTTPClientTimeout)
 	defer cancel()
 
 	server, res, err := h.service.GetServerDetail(ctx, identifier)
@@ -69,7 +70,7 @@ func (h *PanelHandler) panelHandleSelect(e *events.ComponentInteractionCreate) {
 func (h *PanelHandler) panelHandlePower(e *events.ComponentInteractionCreate, identifier, signal string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.PanelPowerActionTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultPanelPowerTimeout)
 	defer cancel()
 
 	server, res, err := h.service.PowerAction(ctx, identifier, signal)
@@ -85,7 +86,7 @@ func (h *PanelHandler) panelHandlePower(e *events.ComponentInteractionCreate, id
 func (h *PanelHandler) panelHandleRefresh(e *events.ComponentInteractionCreate, identifier string) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.HTTPClientTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultHTTPClientTimeout)
 	defer cancel()
 
 	server, res, err := h.service.GetServerDetail(ctx, identifier)
@@ -101,7 +102,7 @@ func (h *PanelHandler) panelHandleRefresh(e *events.ComponentInteractionCreate, 
 func (h *PanelHandler) panelHandleBack(e *events.ComponentInteractionCreate) {
 	_ = e.DeferUpdateMessage()
 
-	ctx, cancel := context.WithTimeout(context.Background(), h.cfg.HTTPClientTimeout)
+	ctx, cancel := context.WithTimeout(context.Background(), config.DefaultHTTPClientTimeout)
 	defer cancel()
 
 	servers, err := h.service.ListServersWithStatus(ctx)
