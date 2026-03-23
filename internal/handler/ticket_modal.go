@@ -1,0 +1,58 @@
+package handler
+
+import (
+	"fmt"
+	"log/slog"
+
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/disgo/events"
+	"github.com/s12kuma01/pedmin/internal/model"
+)
+
+func (h *TicketHandler) HandleModal(e *events.ModalSubmitInteractionCreate) {
+	if e.Data.CustomID != model.TicketModuleID+":create_modal" {
+		return
+	}
+
+	guildID := e.GuildID()
+	if guildID == nil {
+		return
+	}
+
+	subject := ""
+	if ti, ok := e.Data.TextInput(model.TicketModuleID + ":subject"); ok {
+		subject = ti.Value
+	}
+	description := ""
+	if ti, ok := e.Data.TextInput(model.TicketModuleID + ":description"); ok {
+		description = ti.Value
+	}
+
+	if subject == "" {
+		_ = e.CreateMessage(discord.NewMessageCreateV2(
+			discord.NewContainer(
+				discord.NewTextDisplay("件名を入力してください。"),
+			),
+		).WithEphemeral(true))
+		return
+	}
+
+	_ = e.DeferCreateMessage(true)
+
+	channelID, _, err := h.service.CreateTicket(*guildID, e.User().ID, subject, description)
+	if err != nil {
+		h.logger.Error("failed to create ticket", slog.Any("error", err))
+		_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
+			discord.NewContainer(
+				discord.NewTextDisplay("チケットの作成に失敗しました。"),
+			),
+		}))
+		return
+	}
+
+	_, _ = e.Client().Rest.UpdateInteractionResponse(e.ApplicationID(), e.Token(), discord.NewMessageUpdateV2([]discord.LayoutComponent{
+		discord.NewContainer(
+			discord.NewTextDisplay(fmt.Sprintf("チケットを作成しました: <#%d>", channelID)),
+		),
+	}))
+}
