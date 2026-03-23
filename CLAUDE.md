@@ -1,7 +1,7 @@
 # Pedmin - Discord Bot
 
 Pedmin (pepe + administrator) is a modular Discord bot built with Go 1.26.1 and disgo v0.19.2. It serves as a Probot
-replacement, featuring Components V2 UI, music playback via Lavalink, and a layered Feature Module architecture. Runs on
+replacement, featuring Components V2 UI, music playback via Lavalink, and a standard Go layered architecture. Runs on
 Windows Docker Desktop.
 
 ## Tech Stack
@@ -17,7 +17,7 @@ Windows Docker Desktop.
 
 ```bash
 # Build
-go build ./...
+go build ./cmd/pedmin/...
 
 # Run tests
 go test ./...
@@ -31,175 +31,175 @@ docker compose up -d     # Detached mode
 docker compose build     # Rebuild bot image
 ```
 
-## Architecture: Layered Feature Module Pattern
+## Architecture: Standard Go Layered Pattern
 
-Each feature is a self-contained module with internal layer separation (handler/service/view), all within the same Go
-package.
+The project follows standard Go large-service conventions with `cmd/`, `internal/`, and `pkg/` directories. Layers are
+separated by package: handler (controller) → service (business logic) → repository (persistence), with shared model and
+view packages.
 
 ```
-main.go                        # Entrypoint: DI wiring, graceful shutdown
-config/config.go               # Env vars + TOML file loading
-module/module.go               # Module interface definition
-deepl/
-├── client.go                  # DeepL translation API client (shared)
-└── lang.go                    # Language code → Japanese name mapping
-ui/
-├── ui.go                      # Shared UI helpers (EphemeralV2, ErrorMessage)
-├── format.go                  # FormatBytes, BuildBar, FormatUptime
-└── settings_panel.go          # BuildModulePanel, BuildMainPanel (shared settings UI)
-bot/
-├── bot.go                     # Client init, module registry, lifecycle
-├── commands.go                # Global command sync
-├── router.go                  # Interaction → Module dispatch
-├── voice.go                   # VoiceState/VoiceServer → Lavalink relay
-└── presence.go                # Bot presence updater (CPU/RAM monitoring)
-store/
-├── store.go                   # SettingsStore/TicketStore/RSSStore/GuildStore interfaces
-├── module_settings.go         # Generic LoadModuleSettings/SaveModuleSettings helpers
-├── sqlite_store.go            # SQLite implementation (WAL mode)
-├── sqlite_migrations.go       # Schema migrations
-├── sqlite_modules.go          # Module settings persistence
-├── sqlite_ticket.go           # Ticket persistence
-└── sqlite_rss.go              # RSS feed persistence
-features/settings/
-├── module.go                  # Info, Commands, Bot interface
-├── handler_command.go         # /settings slash command
-├── handler_component.go       # Select/toggle/back dispatch
-└── view.go                    # (delegates to ui/settings_panel.go)
-features/ping/
-├── module.go                  # Info, Commands
-├── handler_command.go         # /ping command
-└── view.go                    # Ping response UI builder
-features/avatar/
-├── module.go                  # Info, Commands
-├── handler_command.go         # /avatar command, user resolve
-└── view_avatar.go             # Avatar MediaGallery builder
-features/embedfix/
-├── module.go                  # Info, Bot deps, module interface
-├── listener.go                # GuildMessageCreate listener, URL detection
-├── handler_component.go       # Translate button + platform settings dispatch
-├── service_embed.go           # URL processing, platform-specific embed sending
-├── service_translate.go       # Translation workflow per platform
-├── settings.go                # Settings struct & persistence
-├── domain.go                  # Platform type, EmbedRef, URL regex matching
-├── client_twitter.go          # FxTwitter API client
-├── client_reddit.go           # Reddit JSON API client
-├── client_tiktok.go           # TikTok proxy API client
-├── view_twitter.go            # Tweet embed UI builder
-├── view_reddit.go             # Reddit post embed UI builder
-├── view_tiktok.go             # TikTok video embed UI builder
-├── view_settings.go           # Platform toggle settings panel
-└── view_helpers.go            # Emoji constants, formatCount
-features/translator/
-├── module.go                  # Info, Bot deps
-├── listener.go                # MessageReactionAdd listener
-├── service.go                 # Fetch message → translate → post
-├── view.go                    # Translation embed UI builder
-└── view_helpers.go            # Flag emoji → language code mapping
-features/fuckfetch/
-├── module.go                  # Info, Commands
-├── handler_command.go         # /fuckfetch command
-├── service.go                 # System info gathering
-└── view.go                    # Neofetch-style output builder
-features/panel/
-├── module.go                  # Info, Commands, permission check
-├── handler_command.go         # /panel slash command
-├── handler_component.go       # Button/select dispatch
-├── handler_modal.go           # Console command modal
-├── service.go                 # Server list/detail/power/console operations
-├── client.go                  # Pelican API HTTP client + domain types
-├── client_actions.go          # Power/console action methods
-├── view_panel.go              # Server list, detail panels
-├── view_console.go            # Console result/error panels
-└── view_helpers.go            # Format helpers (bytes, bars, uptime, emoji)
-features/player/
-├── module.go                  # Info, Commands
-├── handler_command.go         # /player slash command
-├── handler_component.go       # Button/select switch dispatch
-├── handler_modal.go           # Add-to-queue modal
-├── handler_queue.go           # Queue page navigation
-├── service.go                 # Playback logic (Discord API independent)
-├── settings.go                # Per-guild volume settings
-├── voice.go                   # VC connection helper
-├── queue.go                   # Queue data structure
-├── queue_manager.go           # Per-guild queue management
-├── loop_mode.go               # LoopMode type + constants
-├── lavalink.go                # Lavalink event listeners + node connection
-├── auto_leave.go              # Auto-leave on empty VC
-├── message_tracker.go         # Player message tracking for updates
-├── view_player.go             # Player UI builder
-├── view_queue.go              # Queue UI builder
-├── view_settings.go           # Volume settings panel
-└── view_helpers.go            # Progress bar, duration format, thumbnails
-features/url/
-├── module.go                  # Info, Commands
-├── handler_command.go         # /url command
-├── handler_component.go       # Button dispatch (shorten/check/back)
-├── handler_modal.go           # Modal submission (shorten/check)
-├── service.go                 # URL validation, shorten, scan
-├── client.go                  # URLClient struct + x.gd shorten
-├── client_virustotal.go       # VirusTotal scan client
-└── view.go                    # Main panel, result, error panels
-features/ticket/
-├── module.go                  # Info, Commands, Bot/Client/Store deps
-├── handler_component.go       # Create/close/reopen ticket buttons
-├── handler_settings.go        # Settings UI interactions
-├── handler_modal.go           # Ticket creation modal
-├── handler_deploy.go          # Panel deployment
-├── service.go                 # Ticket creation/closure logic
-├── service_log.go             # Log & transcript sending
-├── service_settings.go        # Category/log channel/role updates
-├── transcript.go              # HTML transcript generation
-├── settings.go                # Settings struct & persistence
-├── view_settings.go           # Settings panel UI
-├── view_panel.go              # Ticket control panel UI
-├── view_ticket.go             # Ticket channel message UI
-└── view_log.go                # Ticket list/log UI
-features/logger/
-├── module.go                  # Info, Bot/Client/Store deps
-├── listener.go                # Listener setup + sendLog helper
-├── listener_message.go        # Message edit/delete listeners
-├── listener_guild.go          # Member/ban/role/channel listeners
-├── handler_component.go       # Settings component handling
-├── settings.go                # Logger settings (channel ID, event toggles)
-├── view_settings.go           # Settings panel UI
-├── view_message_log.go        # Message edit/delete log builders
-├── view_guild_log.go          # Member/ban/role/channel log builders
-├── view_structure_log.go      # Channel structure change log builders
-└── view_attachment.go         # Attachment diff & display
-features/rss/
-├── module.go                  # Info, Bot/Client/Store deps
-├── handler_component.go       # Add/remove feed dispatch
-├── handler_add_feed.go        # Add feed prompt & validation
-├── handler_modal.go           # Feed URL input modal
-├── service.go                 # Feed CRUD, validation, post logic
-├── service_poll.go            # Single feed poll logic
-├── poller.go                  # Background polling routine
-├── view_settings.go           # Settings panel (feed count)
-├── view_manage.go             # Feed list/detail UI
-├── view_feed.go               # Feed item announcement builder
-└── view_helpers.go            # Text utilities (stripHTML, truncate)
+cmd/pedmin/main.go                 # Entrypoint: DI wiring, graceful shutdown
+config/
+├── config.go                      # Env vars + TOML file loading
+└── config_toml.go                 # Default TOML values
+migrations/
+├── embed.go                       # embed.FS export for SQL files
+├── 001_guild_modules.sql          # Guild modules + settings tables
+├── 002_tickets.sql                # Tickets table
+└── 003_rss_feeds.sql              # RSS feeds + seen items tables
+pkg/deepl/
+├── client.go                      # DeepL translation API client
+└── lang.go                        # Language code → Japanese name mapping
+internal/
+├── module/
+│   └── module.go                  # Module interface definition
+├── bot/
+│   ├── bot.go                     # Client init, module registry, lifecycle
+│   ├── commands.go                # Global command sync
+│   ├── router.go                  # Interaction → Module dispatch
+│   ├── voice.go                   # VoiceState/VoiceServer → Lavalink relay
+│   └── presence.go                # Bot presence updater (CPU/RAM monitoring)
+├── model/                         # Domain types, settings, constants
+│   ├── constants.go               # All ModuleID constants
+│   ├── guild.go                   # GuildSettings, Ticket, RSSFeed
+│   ├── player.go                  # Queue, QueueManager, LoopMode, PlayerSettings
+│   ├── embedfix.go                # Platform, EmbedRef, EmbedFixSettings, URL matchers
+│   ├── twitter.go                 # Tweet, TweetAuthor, TweetMedia
+│   ├── reddit.go                  # RedditPost
+│   ├── tiktok.go                  # TikTokVideo, TikTokAuthor
+│   ├── ticket.go                  # TicketSettings
+│   ├── logger.go                  # LoggerSettings, event constants
+│   ├── panel.go                   # Server, ServerLimits, Resources
+│   ├── url.go                     # VTResult
+│   ├── fuckfetch.go               # SystemInfo
+│   └── translator.go              # FlagToLang mapping
+├── repository/                    # Data persistence (GuildStore interface)
+│   ├── repository.go              # GuildStore = SettingsStore + TicketStore + RSSStore
+│   ├── module_settings.go         # Generic LoadModuleSettings/SaveModuleSettings helpers
+│   ├── sqlite.go                  # SQLite implementation (WAL mode) + migrations
+│   ├── sqlite_modules.go          # Module settings persistence
+│   ├── sqlite_ticket.go           # Ticket persistence
+│   └── sqlite_rss.go              # RSS feed persistence
+├── client/                        # External API clients
+│   ├── twitter.go                 # FxTwitter API client
+│   ├── reddit.go                  # Reddit JSON API client
+│   ├── tiktok.go                  # TikTok proxy API client
+│   ├── panel.go                   # Pelican API client + actions
+│   ├── url.go                     # x.gd URL shortener client
+│   └── virustotal.go              # VirusTotal scan client
+├── service/                       # Business logic (Discord event-independent)
+│   ├── player.go                  # Playback control, queue operations
+│   ├── player_lavalink.go         # Lavalink event listeners + node connection
+│   ├── player_autoleave.go        # Auto-leave timer logic
+│   ├── player_progress.go         # Progress ticker + message tracker
+│   ├── embedfix.go                # URL detection, platform embed sending
+│   ├── embedfix_translate.go      # Translation workflow per platform
+│   ├── ticket.go                  # Ticket creation/closure logic
+│   ├── ticket_log.go              # Log, transcript sending, HTML generation
+│   ├── ticket_settings.go         # Category/log channel/role updates
+│   ├── logger.go                  # Logger settings load/save
+│   ├── rss.go                     # Feed CRUD, validation, poll logic
+│   ├── rss_poller.go              # Background polling routine
+│   ├── translator.go              # Translation service
+│   ├── panel.go                   # Server list/detail/power/console
+│   ├── url.go                     # URL validation, shorten, scan
+│   ├── fuckfetch.go               # System info gathering
+│   └── settings.go                # Settings module service (if any)
+├── handler/                       # Discord interaction handlers (module.Module impl)
+│   ├── ping.go                    # /ping command
+│   ├── avatar.go                  # /avatar command
+│   ├── fuckfetch.go               # /fuckfetch command
+│   ├── settings.go                # /settings command + component dispatch
+│   ├── player.go                  # /player command + module interface
+│   ├── player_component.go        # Player button/select dispatch
+│   ├── player_modal.go            # Add-to-queue modal
+│   ├── player_queue.go            # Queue page navigation
+│   ├── embedfix.go                # Module interface + listener setup
+│   ├── embedfix_component.go      # Translate button + settings dispatch
+│   ├── embedfix_listener.go       # MessageCreate listener
+│   ├── translator.go              # Module interface + listener setup
+│   ├── translator_listener.go     # ReactionAdd listener
+│   ├── panel.go                   # /panel command
+│   ├── panel_component.go         # Panel button/select dispatch
+│   ├── panel_modal.go             # Console command modal
+│   ├── ticket.go                  # Module interface
+│   ├── ticket_component.go        # Create/close/reopen buttons
+│   ├── ticket_modal.go            # Ticket creation modal
+│   ├── ticket_deploy.go           # Panel deployment
+│   ├── ticket_settings.go         # Settings UI interactions
+│   ├── logger.go                  # Module interface + listener setup
+│   ├── logger_listener.go         # Message/guild event listeners
+│   ├── logger_component.go        # Settings component handling
+│   ├── rss.go                     # Module interface
+│   ├── rss_component.go           # Add/remove feed dispatch
+│   ├── rss_add_feed.go            # Add feed prompt/validation
+│   ├── rss_modal.go               # Feed URL input modal
+│   ├── url.go                     # /url command
+│   ├── url_component.go           # Shorten/check/back buttons
+│   └── url_modal.go               # Modal submission
+├── view/                          # UI builders (pure functions)
+│   ├── ping.go                    # Ping response
+│   ├── avatar.go                  # Avatar MediaGallery
+│   ├── fuckfetch.go               # Neofetch-style output
+│   ├── player.go                  # Player UI
+│   ├── player_queue.go            # Queue UI
+│   ├── player_settings.go         # Volume settings panel
+│   ├── player_helpers.go          # Progress bar, duration format
+│   ├── embedfix_twitter.go        # Tweet embed
+│   ├── embedfix_reddit.go         # Reddit embed
+│   ├── embedfix_tiktok.go         # TikTok embed
+│   ├── embedfix_settings.go       # Platform toggle settings
+│   ├── embedfix_helpers.go        # Emoji constants, formatCount
+│   ├── translator.go              # Translation embed
+│   ├── panel.go                   # Server list/detail panels
+│   ├── panel_console.go           # Console result/error panels
+│   ├── panel_helpers.go           # Format helpers
+│   ├── ticket_panel.go            # Ticket control panel
+│   ├── ticket_ticket.go           # Ticket channel message
+│   ├── ticket_log.go              # Ticket list/log
+│   ├── ticket_settings.go         # Ticket settings panel
+│   ├── logger_settings.go         # Logger settings panel
+│   ├── logger_message.go          # Message edit/delete logs
+│   ├── logger_guild.go            # Member/ban/role/channel logs
+│   ├── logger_structure.go        # Channel structure logs
+│   ├── logger_attachment.go       # Attachment diff/display
+│   ├── rss_settings.go            # RSS settings panel
+│   ├── rss_manage.go              # Feed list/detail
+│   ├── rss_feed.go                # Feed item announcement
+│   ├── rss_helpers.go             # Text utilities
+│   └── url.go                     # URL panels
+└── ui/                            # Shared Discord UI helpers
+    ├── ui.go                      # EphemeralV2, ErrorMessage
+    ├── format.go                  # FormatBytes, BuildBar, FormatUptime
+    └── settings_panel.go          # BuildModulePanel, BuildMainPanel
 ```
 
 ## Key Design Decisions
 
-### 1 File = 1 Responsibility
+### Standard Go Project Layout
 
-Every `.go` file has a single, clear responsibility. No file mixes handler logic with UI building or service logic.
+The project follows `cmd/`, `internal/`, `pkg/` conventions. Layers are separated by package, not by file within a
+package. This enables clear dependency boundaries and testability.
 
-### Feature Module Pattern
+### Layer Separation
 
-Each feature (`features/player/`, `features/settings/`) is a self-contained Go package. Internal layers (handler →
-service → view) are separated by file, not by package. Same `package player` throughout — no circular import issues.
+- **handler** (controller): Receives Discord events, extracts data, calls service, builds view, sends response
+- **service** (business logic): Discord event-independent, operates on primitive types and model types
+- **view** (UI builder): Pure functions — state in → Discord components out
+- **model** (domain): Shared types, constants, settings structs
+- **repository** (persistence): Database interfaces and implementations
+- **client** (external APIs): HTTP clients for third-party services
 
 ### Module Interface (`module.Module`)
 
 All features implement: `Info()`, `Commands()`, `HandleCommand()`, `HandleComponent()`, `HandleModal()`,
-`SettingsPanel()`. Optional: `SettingsSummarizer`, `VoiceStateListener`. Registered in `main.go` via `bot.Register()`.
+`SettingsPanel()`. Optional: `SettingsSummarizer`, `VoiceStateListener`. Handler structs implement this interface.
+Registered in `main.go` via `bot.Register()`.
 
 ### CustomID Convention
 
 Component CustomIDs follow `{moduleID}:{action}:{extra}`. Router splits on the first colon to dispatch.
+ModuleID constants are centralized in `internal/model/constants.go`.
 
 ### Components V2
 
@@ -208,9 +208,25 @@ on containers.
 
 ### GuildStore Interface
 
-`store.GuildStore` abstracts persistence, composed from `SettingsStore`, `TicketStore`, and `RSSStore` sub-interfaces
-(ISP). Generic `LoadModuleSettings[T]`/`SaveModuleSettings[T]` helpers reduce per-module boilerplate. SQLite at
-`data/pedmin.db` with WAL mode. No JSON fallback.
+`repository.GuildStore` abstracts persistence, composed from `SettingsStore`, `TicketStore`, and `RSSStore`
+sub-interfaces (ISP). Generic `LoadModuleSettings[T]`/`SaveModuleSettings[T]` helpers reduce per-module boilerplate.
+SQLite at `data/pedmin.db` with WAL mode. Migrations loaded via `embed.FS` from `migrations/`.
+
+### Import Dependency Graph (no cycles)
+
+```
+cmd/pedmin/main.go → config, internal/bot, internal/handler, internal/service, internal/repository, internal/client
+internal/handler   → internal/service, internal/view, internal/model, internal/module, internal/ui
+internal/service   → internal/repository, internal/model, internal/client, pkg/deepl
+internal/view      → internal/model, internal/ui
+internal/bot       → internal/module, internal/repository, internal/ui, config
+internal/repository → internal/model
+internal/client    → internal/model
+internal/ui        → internal/module
+internal/module    → (leaf: disgo types only)
+internal/model     → (leaf: disgo, disgolink types only)
+pkg/deepl          → (leaf: stdlib only)
+```
 
 ## Documentation
 

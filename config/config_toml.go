@@ -1,3 +1,6 @@
+// opyright (c) 2025-2026 s12kuma01
+// SPDX-License-Identifier: MPL-2.0
+
 package config
 
 import (

@@ -1,0 +1,29 @@
+// opyright (c) 2025-2026 s12kuma01
+// SPDX-License-Identifier: MPL-2.0
+
+package view
+
+import (
+	"fmt"
+
+	"github.com/disgoorg/disgo/discord"
+	"github.com/disgoorg/snowflake/v2"
+	"github.com/s12kuma01/pedmin/pkg/deepl"
+)
+
+// BuildTranslationEmbed builds the translation result message.
+func BuildTranslationEmbed(translatedText string, sourceLang, targetLang string, authorID snowflake.ID, messageID snowflake.ID) discord.MessageCreate {
+	header := fmt.Sprintf("🌐 **翻訳** (%s → %s)", deepl.LangName(sourceLang), deepl.LangName(targetLang))
+
+	components := []discord.ContainerSubComponent{
+		discord.NewTextDisplay(header),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(translatedText),
+		discord.NewSmallSeparator(),
+		discord.NewTextDisplay(fmt.Sprintf("-# 翻訳元: <@%d>", authorID)),
+	}
+
+	return discord.NewMessageCreateV2(
+		discord.NewContainer(components...),
+	).WithMessageReferenceByID(messageID)
+}

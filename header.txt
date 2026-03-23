@@ -1,0 +1,2 @@
+opyright (c) {{.Year}} {{.Holder}}
+SPDX-License-Identifier: MPL-2.0

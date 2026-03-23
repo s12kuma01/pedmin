@@ -43,15 +43,23 @@ https://discord.com/oauth2/authorize?client_id=1484236709611704571
 
 ## アーキテクチャ
 
-各機能は独立した Feature Module として実装され、内部で handler/service/view レイヤーに分離されています。
+Go の標準的な大規模サービスレイアウト（`cmd/`, `internal/`, `pkg/`）に従い、パッケージ単位でレイヤーを分離しています。
 
 ```
-main.go          # エントリポイント: DI 配線、グレースフルシャットダウン
-config/          # 環境変数 + TOML 設定読み込み
-bot/             # Discord 接続、インタラクションルーティング
-module/          # Module インターフェース定義
-features/        # 機能モジュール (11個)
-store/           # GuildStore インターフェース + SQLite 実装
+cmd/pedmin/main.go       # エントリポイント: DI 配線、グレースフルシャットダウン
+config/                  # 環境変数 + TOML 設定読み込み
+migrations/              # SQL マイグレーションファイル (embed.FS)
+pkg/deepl/               # 外部再利用可能な DeepL クライアント
+internal/
+├── module/              # Module インターフェース定義
+├── bot/                 # Discord 接続、インタラクションルーティング
+├── model/               # ドメイン型・設定型・定数
+├── repository/          # GuildStore インターフェース + SQLite 実装
+├── client/              # 外部 API クライアント
+├── service/             # ビジネスロジック
+├── handler/             # Discord インタラクションハンドラー
+├── view/                # UI ビルダー（純粋関数）
+└── ui/                  # 共有 UI ヘルパー
 ```
 
 詳細は [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) を参照。
@@ -60,7 +68,7 @@ store/           # GuildStore インターフェース + SQLite 実装
 
 [`docs/`](docs/) ディレクトリに詳細ガイドがあります:
 
-- [Architecture](docs/ARCHITECTURE.md) — レイヤード Feature Module 設計
+- [Architecture](docs/ARCHITECTURE.md) — Standard Go レイヤードアーキテクチャ設計
 - [Module Development](docs/MODULE_GUIDE.md) — モジュール作成ガイド
 - [Components V2](docs/COMPONENTS_V2.md) — disgo V2 コンポーネントリファレンス
 - [Lavalink Integration](docs/LAVALINK.md) — 音楽再生セットアップ
