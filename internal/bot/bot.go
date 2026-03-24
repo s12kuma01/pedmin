@@ -1,4 +1,4 @@
-// opyright (c) 2025-2026 s12kuma01
+// Copyright (c) 2025-2026 s12kuma01
 // SPDX-License-Identifier: MPL-2.0
 
 // Package bot manages the Discord client lifecycle, module registry, and interaction routing.

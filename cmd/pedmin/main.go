@@ -1,4 +1,4 @@
-// opyright (c) 2025-2026 s12kuma01
+// Copyright (c) 2025-2026 s12kuma01
 // SPDX-License-Identifier: MPL-2.0
 
 package main
@@ -117,6 +117,12 @@ func main() {
 	autoroleHandler := handler.NewAutoroleHandler(b, autoroleSvc, logger)
 	handler.SetupAutoroleListeners(b.Client, autoroleHandler)
 	b.Register(autoroleHandler)
+
+	// --- Component Builder ---
+
+	builderSvc := service.NewBuilderService(guildStore, b.Client, logger)
+	builderHandler := handler.NewBuilderHandler(builderSvc, logger)
+	b.Register(builderHandler)
 
 	// --- Panel ---
 

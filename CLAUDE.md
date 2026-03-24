@@ -41,15 +41,21 @@ view packages.
 cmd/pedmin/main.go                 # Entrypoint: DI wiring, graceful shutdown
 config/
 ├── config.go                      # Env vars + TOML file loading
-└── config_toml.go                 # Default TOML values
+└── defaults.go                    # Default configuration values
 migrations/
 ├── embed.go                       # embed.FS export for SQL files
 ├── 001_guild_modules.sql          # Guild modules + settings tables
 ├── 002_tickets.sql                # Tickets table
-└── 003_rss_feeds.sql              # RSS feeds + seen items tables
+├── 003_rss_feeds.sql              # RSS feeds + seen items tables
+├── 004_counters.sql               # Word counters + hit logs tables
+├── 005_leveling.sql               # User XP + role rewards tables
+└── 006_component_panels.sql       # Component builder panels table
 pkg/deepl/
 ├── client.go                      # DeepL translation API client
 └── lang.go                        # Language code → Japanese name mapping
+pkg/rankcard/
+├── rankcard.go                    # Canvas rank card image generation (fogleman/gg)
+└── font.go                        # Embedded Noto Sans JP font
 internal/
 ├── module/
 │   └── module.go                  # Module interface definition
@@ -72,14 +78,21 @@ internal/
 │   ├── panel.go                   # Server, ServerLimits, Resources
 │   ├── url.go                     # VTResult
 │   ├── fuckfetch.go               # SystemInfo
-│   └── translator.go              # FlagToLang mapping
+│   ├── translator.go              # FlagToLang mapping
+│   ├── counter.go                 # Counter, MatchType, CounterStat
+│   ├── leveling.go                # UserXP, LevelingSettings, XP formula
+│   ├── autorole.go                # AutoroleSettings
+│   └── builder.go                 # ComponentPanel, PanelComponent types
 ├── repository/                    # Data persistence (GuildStore interface)
-│   ├── repository.go              # GuildStore = SettingsStore + TicketStore + RSSStore
+│   ├── repository.go              # GuildStore = SettingsStore + TicketStore + RSSStore + CounterStore + LevelingStore + PanelBuilderStore
 │   ├── module_settings.go         # Generic LoadModuleSettings/SaveModuleSettings helpers
 │   ├── sqlite.go                  # SQLite implementation (WAL mode) + migrations
 │   ├── sqlite_modules.go          # Module settings persistence
 │   ├── sqlite_ticket.go           # Ticket persistence
-│   └── sqlite_rss.go              # RSS feed persistence
+│   ├── sqlite_rss.go              # RSS feed persistence
+│   ├── sqlite_counter.go          # Word counter persistence
+│   ├── sqlite_leveling.go         # Leveling XP + role rewards persistence
+│   └── sqlite_builder.go          # Component panel persistence
 ├── client/                        # External API clients
 │   ├── twitter.go                 # FxTwitter API client
 │   ├── reddit.go                  # Reddit JSON API client
@@ -104,7 +117,12 @@ internal/
 │   ├── panel.go                   # Server list/detail/power/console
 │   ├── url.go                     # URL validation, shorten, scan
 │   ├── fuckfetch.go               # System info gathering
-│   └── settings.go                # Settings module service (if any)
+│   ├── counter.go                 # Word counter logic + regex cache
+│   ├── leveling.go                # XP processing, cooldowns, multipliers
+│   ├── leveling_voice.go          # Voice XP session tracking + ticker
+│   ├── leveling_rankcard.go       # Rank card image generation
+│   ├── autorole.go                # Auto role assignment on member join
+│   └── builder.go                 # Component panel CRUD + deploy
 ├── handler/                       # Discord interaction handlers (module.Module impl)
 │   ├── ping.go                    # /ping command
 │   ├── avatar.go                  # /avatar command
@@ -136,7 +154,23 @@ internal/
 │   ├── rss_modal.go               # Feed URL input modal
 │   ├── url.go                     # /url command
 │   ├── url_component.go           # Shorten/check/back buttons
-│   └── url_modal.go               # Modal submission
+│   ├── url_modal.go               # Modal submission
+│   ├── counter.go                 # Counter module interface + listener
+│   ├── counter_component.go       # Counter settings/stats dispatch
+│   ├── counter_modal.go           # Counter word input modal
+│   ├── leveling.go                # Leveling module + /rank, /leaderboard
+│   ├── leveling_listener.go       # Message XP listener
+│   ├── leveling_component_settings.go  # Leveling settings tab dispatch
+│   ├── leveling_component_rewards.go   # Rewards/multipliers dispatch
+│   ├── leveling_modal_settings.go      # XP/cooldown/voice modals
+│   ├── leveling_modal_rewards.go       # Reward/multiplier modals
+│   ├── autorole.go                # Autorole module + member join listener
+│   ├── builder.go                 # Builder module interface
+│   ├── builder_component_add.go   # Add component flows
+│   ├── builder_component_manage.go # Component management
+│   ├── builder_component_deploy.go # Deploy/preview/delete flows
+│   ├── builder_modal.go           # Panel create/rename modals
+│   └── builder_modal_components.go # Component input modals
 ├── view/                          # UI builders (pure functions)
 │   ├── ping.go                    # Ping response
 │   ├── avatar.go                  # Avatar MediaGallery
@@ -167,7 +201,22 @@ internal/
 │   ├── rss_manage.go              # Feed list/detail
 │   ├── rss_feed.go                # Feed item announcement
 │   ├── rss_helpers.go             # Text utilities
-│   └── url.go                     # URL panels
+│   ├── url.go                     # URL panels
+│   ├── counter_settings.go        # Counter settings panel
+│   ├── counter_manage.go          # Counter list/detail + add type prompt
+│   ├── counter_stats.go           # Counter stats + user ranking
+│   ├── leveling_settings.go       # Leveling general settings tab
+│   ├── leveling_settings_rewards.go    # Leveling rewards tab
+│   ├── leveling_settings_multipliers.go # Leveling multipliers tab
+│   ├── leveling_leaderboard.go    # Leaderboard with pagination
+│   ├── leveling_levelup.go        # Level-up notification (placeholder)
+│   ├── autorole_settings.go       # Autorole settings panel
+│   ├── builder_list.go            # Panel list UI
+│   ├── builder_edit.go            # Panel edit mode UI
+│   ├── builder_manage.go          # Component management UI
+│   ├── builder_deploy.go          # Deploy flow UI
+│   ├── builder_helpers.go         # Builder view helpers
+│   └── builder_render.go          # Panel render (JSON → Components V2)
 └── ui/                            # Shared Discord UI helpers
     ├── ui.go                      # EphemeralV2, ErrorMessage
     ├── format.go                  # FormatBytes, BuildBar, FormatUptime
@@ -208,8 +257,8 @@ on containers.
 
 ### GuildStore Interface
 
-`repository.GuildStore` abstracts persistence, composed from `SettingsStore`, `TicketStore`, and `RSSStore`
-sub-interfaces (ISP). Generic `LoadModuleSettings[T]`/`SaveModuleSettings[T]` helpers reduce per-module boilerplate.
+`repository.GuildStore` abstracts persistence, composed from `SettingsStore`, `TicketStore`, `RSSStore`,
+`CounterStore`, `LevelingStore`, and `PanelBuilderStore` sub-interfaces (ISP). Generic `LoadModuleSettings[T]`/`SaveModuleSettings[T]` helpers reduce per-module boilerplate.
 SQLite at `data/pedmin.db` with WAL mode. Migrations loaded via `embed.FS` from `migrations/`.
 
 ### Import Dependency Graph (no cycles)
@@ -217,7 +266,7 @@ SQLite at `data/pedmin.db` with WAL mode. Migrations loaded via `embed.FS` from 
 ```
 cmd/pedmin/main.go → config, internal/bot, internal/handler, internal/service, internal/repository, internal/client
 internal/handler   → internal/service, internal/view, internal/model, internal/module, internal/ui
-internal/service   → internal/repository, internal/model, internal/client, pkg/deepl
+internal/service   → internal/repository, internal/model, internal/view, internal/client, pkg/deepl, pkg/rankcard
 internal/view      → internal/model, internal/ui
 internal/bot       → internal/module, internal/repository, internal/ui, config
 internal/repository → internal/model
@@ -226,6 +275,7 @@ internal/ui        → internal/module
 internal/module    → (leaf: disgo types only)
 internal/model     → (leaf: disgo, disgolink types only)
 pkg/deepl          → (leaf: stdlib only)
+pkg/rankcard       → (leaf: fogleman/gg, golang.org/x/image)
 ```
 
 ## Documentation

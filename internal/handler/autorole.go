@@ -4,7 +4,6 @@
 package handler
 
 import (
-	"fmt"
 	"log/slog"
 
 	disgobot "github.com/disgoorg/disgo/bot"
@@ -82,7 +81,7 @@ func (h *AutoroleHandler) SettingsSummary(guildID snowflake.ID) string {
 	if len(parts) == 0 {
 		return "未設定"
 	}
-	return fmt.Sprintf("%s", joinParts(parts))
+	return joinParts(parts)
 }
 
 func (h *AutoroleHandler) SettingsPanel(guildID snowflake.ID) []discord.LayoutComponent {
@@ -114,25 +113,25 @@ func (h *AutoroleHandler) handleComponent(e *events.ComponentInteractionCreate) 
 		return
 	}
 
-	switch {
-	case customID == model.AutoroleModuleID+":user_role":
+	switch customID {
+	case model.AutoroleModuleID + ":user_role":
 		data, ok := e.Data.(discord.RoleSelectMenuInteractionData)
 		if !ok || len(data.Values) == 0 {
 			return
 		}
 		settings.UserRoleID = data.Values[0]
 
-	case customID == model.AutoroleModuleID+":bot_role":
+	case model.AutoroleModuleID + ":bot_role":
 		data, ok := e.Data.(discord.RoleSelectMenuInteractionData)
 		if !ok || len(data.Values) == 0 {
 			return
 		}
 		settings.BotRoleID = data.Values[0]
 
-	case customID == model.AutoroleModuleID+":clear_user":
+	case model.AutoroleModuleID + ":clear_user":
 		settings.UserRoleID = 0
 
-	case customID == model.AutoroleModuleID+":clear_bot":
+	case model.AutoroleModuleID + ":clear_bot":
 		settings.BotRoleID = 0
 
 	default:

@@ -1,4 +1,4 @@
-// opyright (c) 2025-2026 s12kuma01
+// Copyright (c) 2025-2026 s12kuma01
 // SPDX-License-Identifier: MPL-2.0
 
 package ui
@@ -67,6 +67,15 @@ func buildMainContainer(options []ModuleOption) discord.ContainerComponent {
 			discord.NewTextDisplay("設定可能なモジュールがありません。"),
 		)
 	}
+
+	// Tools section
+	components = append(components,
+		discord.NewLargeSeparator(),
+		discord.NewTextDisplay("**ツール**"),
+		discord.NewActionRow(
+			discord.NewSecondaryButton("Component Builder", "builder:list"),
+		),
+	)
 
 	return discord.NewContainer(components...)
 }
