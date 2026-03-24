@@ -14,39 +14,44 @@ import (
 // BuildFuckfetchOutput builds the neofetch-style system info display.
 func BuildFuckfetchOutput(info *model.SystemInfo) discord.ContainerComponent {
 	const barLen = 20
-	pad := "        " // 8 spaces for label indent
 
-	body := fmt.Sprintf("```\n"+
-		"%-8s%s (%s)\n"+
-		"%-8s%s\n"+
-		"%-8s%s\n"+
-		"%-8s%s (%dC/%dT)\n"+
-		"%s%s %5.1f%%\n"+
-		"%-8s%s\n"+
-		"%-8s%s / %s\n"+
-		"%s%s %5.1f%%\n"+
-		"%-8s%s / %s\n"+
-		"%s%s %5.1f%%\n"+
-		"%-8s↑ %s  ↓ %s\n"+
-		"%-8s%s\n"+
-		"```",
-		"OS", info.OS, info.Platform,
-		"Kernel", info.KernelVersion,
-		"Uptime", ui.FormatUptime(info.Uptime),
-		"CPU", info.CPUModel, info.CPUCores, info.CPUThreads,
-		pad, ui.BuildBarRaw(info.CPUUsage, barLen), info.CPUUsage,
-		"GPU", info.GPUInfo,
-		"RAM", ui.FormatBytes(info.MemUsed), ui.FormatBytes(info.MemTotal),
-		pad, ui.BuildBarRaw(info.MemUsage, barLen), info.MemUsage,
-		"Disk", ui.FormatBytes(info.DiskUsed), ui.FormatBytes(info.DiskTotal),
-		pad, ui.BuildBarRaw(info.DiskUsage, barLen), info.DiskUsage,
-		"Network", ui.FormatBytes(info.NetBytesSent), ui.FormatBytes(info.NetBytesRecv),
-		"NPU", info.NPUInfo,
-	)
+	systemBlock := discord.NewTextDisplay(fmt.Sprintf(
+		"**OS** %s (%s)\n**Kernel** %s\n**Uptime** %s",
+		info.OS, info.Platform,
+		info.KernelVersion,
+		ui.FormatUptime(info.Uptime),
+	))
+
+	cpuBlock := discord.NewTextDisplay(fmt.Sprintf(
+		"**CPU** %s (%dC/%dT)\n%s %.1f%%\n**GPU** %s",
+		info.CPUModel, info.CPUCores, info.CPUThreads,
+		ui.BuildBar(info.CPUUsage, barLen, false), info.CPUUsage,
+		info.GPUInfo,
+	))
+
+	memBlock := discord.NewTextDisplay(fmt.Sprintf(
+		"**RAM** %s / %s\n%s %.1f%%\n**Disk** %s / %s\n%s %.1f%%",
+		ui.FormatBytes(info.MemUsed), ui.FormatBytes(info.MemTotal),
+		ui.BuildBar(info.MemUsage, barLen, false), info.MemUsage,
+		ui.FormatBytes(info.DiskUsed), ui.FormatBytes(info.DiskTotal),
+		ui.BuildBar(info.DiskUsage, barLen, false), info.DiskUsage,
+	))
+
+	netBlock := discord.NewTextDisplay(fmt.Sprintf(
+		"**Network** ↑ %s ↓ %s\n**NPU** %s",
+		ui.FormatBytes(info.NetBytesSent), ui.FormatBytes(info.NetBytesRecv),
+		info.NPUInfo,
+	))
 
 	return discord.NewContainer(
 		discord.NewTextDisplay("### 🖥️ fuckfetch"),
+		discord.NewLargeSeparator(),
+		systemBlock,
 		discord.NewSmallSeparator(),
-		discord.NewTextDisplay(body),
+		cpuBlock,
+		discord.NewSmallSeparator(),
+		memBlock,
+		discord.NewSmallSeparator(),
+		netBlock,
 	)
 }
