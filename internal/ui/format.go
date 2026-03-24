@@ -27,8 +27,8 @@ func FormatBytes(bytes uint64) string {
 // block characters from full (█, index 8) to thinnest (▏, index 1).
 var blocks = [9]rune{' ', '▏', '▎', '▍', '▌', '▋', '▊', '▉', '█'}
 
-// BuildBar builds a progress bar using Unicode block characters.
-func BuildBar(percent float64, total int, showPercent bool) string {
+// BuildBarRaw builds a progress bar string without surrounding backticks.
+func BuildBarRaw(percent float64, total int) string {
 	if percent < 0 {
 		percent = 0
 	}
@@ -42,7 +42,6 @@ func BuildBar(percent float64, total int, showPercent bool) string {
 	partialIdx := int(steps) % 8
 
 	var sb strings.Builder
-	sb.WriteRune('`')
 	for i := 0; i < total; i++ {
 		if i < fullCells {
 			sb.WriteRune(blocks[8]) // █
@@ -52,12 +51,16 @@ func BuildBar(percent float64, total int, showPercent bool) string {
 			sb.WriteRune(' ')
 		}
 	}
-	sb.WriteRune('`')
-
-	if showPercent {
-		fmt.Fprintf(&sb, " %.1f%%", percent)
-	}
 	return sb.String()
+}
+
+// BuildBar builds a progress bar using Unicode block characters, wrapped in backticks.
+func BuildBar(percent float64, total int, showPercent bool) string {
+	bar := "`" + BuildBarRaw(percent, total) + "`"
+	if showPercent {
+		bar += fmt.Sprintf(" %.1f%%", percent)
+	}
+	return bar
 }
 
 // FormatUptime formats a duration into a human-readable uptime string (e.g. "3d 2h 15m").

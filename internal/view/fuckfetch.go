@@ -13,58 +13,40 @@ import (
 
 // BuildFuckfetchOutput builds the neofetch-style system info display.
 func BuildFuckfetchOutput(info *model.SystemInfo) discord.ContainerComponent {
-	title := discord.NewTextDisplay("### 🖥️ fuckfetch")
+	const barLen = 20
+	pad := "        " // 8 spaces for label indent
 
-	osBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**OS:** %s (%s)\n**Kernel:** %s\n**Uptime:** %s",
-		info.OS,
-		info.Platform,
-		info.KernelVersion,
-		ui.FormatUptime(info.Uptime),
-	))
-
-	cpuBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**CPU:** %s (%dC/%dT)\n**Usage:** %s",
-		info.CPUModel,
-		info.CPUCores,
-		info.CPUThreads,
-		ui.BuildBar(info.CPUUsage, 20, true),
-	))
-
-	memBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**RAM:** %s / %s %s\n**Swap:** %s / %s %s",
-		ui.FormatBytes(info.MemUsed),
-		ui.FormatBytes(info.MemTotal),
-		ui.BuildBar(info.MemUsage, 20, true),
-		ui.FormatBytes(info.SwapUsed),
-		ui.FormatBytes(info.SwapTotal),
-		ui.BuildBar(info.SwapUsage, 20, true),
-	))
-
-	diskNetBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**Disk (/):** %s / %s %s\n**Net ↑:** %s  **Net ↓:** %s",
-		ui.FormatBytes(info.DiskUsed),
-		ui.FormatBytes(info.DiskTotal),
-		ui.BuildBar(info.DiskUsage, 20, true),
-		ui.FormatBytes(info.NetBytesSent),
-		ui.FormatBytes(info.NetBytesRecv),
-	))
-
-	gpuNpuBlock := discord.NewTextDisplay(fmt.Sprintf(
-		"**GPU:** %s\n**NPU:** %s",
-		info.GPUInfo,
-		info.NPUInfo,
-	))
+	body := fmt.Sprintf("```\n"+
+		"%-8s%s (%s)\n"+
+		"%-8s%s\n"+
+		"%-8s%s\n"+
+		"%-8s%s (%dC/%dT)\n"+
+		"%s%s %5.1f%%\n"+
+		"%-8s%s\n"+
+		"%-8s%s / %s\n"+
+		"%s%s %5.1f%%\n"+
+		"%-8s%s / %s\n"+
+		"%s%s %5.1f%%\n"+
+		"%-8s↑ %s  ↓ %s\n"+
+		"%-8s%s\n"+
+		"```",
+		"OS", info.OS, info.Platform,
+		"Kernel", info.KernelVersion,
+		"Uptime", ui.FormatUptime(info.Uptime),
+		"CPU", info.CPUModel, info.CPUCores, info.CPUThreads,
+		pad, ui.BuildBarRaw(info.CPUUsage, barLen), info.CPUUsage,
+		"GPU", info.GPUInfo,
+		"RAM", ui.FormatBytes(info.MemUsed), ui.FormatBytes(info.MemTotal),
+		pad, ui.BuildBarRaw(info.MemUsage, barLen), info.MemUsage,
+		"Disk", ui.FormatBytes(info.DiskUsed), ui.FormatBytes(info.DiskTotal),
+		pad, ui.BuildBarRaw(info.DiskUsage, barLen), info.DiskUsage,
+		"Network", ui.FormatBytes(info.NetBytesSent), ui.FormatBytes(info.NetBytesRecv),
+		"NPU", info.NPUInfo,
+	)
 
 	return discord.NewContainer(
-		title,
+		discord.NewTextDisplay("### 🖥️ fuckfetch"),
 		discord.NewSmallSeparator(),
-		osBlock,
-		discord.NewSmallSeparator(),
-		cpuBlock,
-		memBlock,
-		discord.NewSmallSeparator(),
-		diskNetBlock,
-		gpuNpuBlock,
+		discord.NewTextDisplay(body),
 	)
 }
