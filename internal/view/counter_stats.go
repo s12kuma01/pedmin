@@ -21,7 +21,7 @@ func CounterStatsPanel(stats []model.CounterStat, period model.StatsPeriod) disc
 		statsText.WriteString("データがありません。")
 	} else {
 		for i, st := range stats {
-			statsText.WriteString(fmt.Sprintf("%d. **%s** — %d回\n", i+1, st.Word, st.HitCount))
+			fmt.Fprintf(&statsText, "%d. **%s** — %d回\n", i+1, st.Word, st.HitCount)
 		}
 	}
 
@@ -86,7 +86,7 @@ func CounterUserRanking(word string, ranks []model.CounterUserRank, period model
 			if i < len(medals) {
 				prefix = medals[i]
 			}
-			rankText.WriteString(fmt.Sprintf("%s <@%d> — %d回\n", prefix, r.UserID, r.HitCount))
+			fmt.Fprintf(&rankText, "%s <@%d> — %d回\n", prefix, r.UserID, r.HitCount)
 		}
 	}
 

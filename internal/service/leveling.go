@@ -7,7 +7,8 @@ import (
 	"context"
 	"fmt"
 	"log/slog"
-	"math/rand/v2"
+	"crypto/rand"
+	"math/big"
 	"sync"
 	"time"
 
@@ -77,7 +78,10 @@ func (s *LevelingService) ProcessMessage(guildID, userID, channelID snowflake.ID
 	// Generate random XP
 	baseXP := settings.MinXP
 	if settings.MaxXP > settings.MinXP {
-		baseXP = settings.MinXP + rand.IntN(settings.MaxXP-settings.MinXP+1)
+		n, err := rand.Int(rand.Reader, big.NewInt(int64(settings.MaxXP-settings.MinXP+1)))
+		if err == nil {
+			baseXP = settings.MinXP + int(n.Int64())
+		}
 	}
 
 	// Apply multipliers
@@ -110,7 +114,6 @@ func (s *LevelingService) onLevelUp(guildID, userID, channelID snowflake.ID, new
 		s.logger.Error("failed to get role rewards", slog.Any("error", err))
 	}
 
-	var earnedRoles []snowflake.ID
 	for _, r := range rewards {
 		if r.Level <= newLevel {
 			if err := s.client.Rest.AddMemberRole(guildID, userID, r.RoleID); err != nil {
@@ -118,8 +121,6 @@ func (s *LevelingService) onLevelUp(guildID, userID, channelID snowflake.ID, new
 					slog.Int("level", r.Level),
 					slog.Any("error", err),
 				)
-			} else {
-				earnedRoles = append(earnedRoles, r.RoleID)
 			}
 		}
 	}

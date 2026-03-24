@@ -38,7 +38,7 @@ func levelingLeaderboardContainer(entries []model.LeaderboardEntry, page, totalP
 			if e.Rank <= 3 {
 				prefix = medals[e.Rank-1]
 			}
-			sb.WriteString(fmt.Sprintf("%s <@%d> — Lv.%d (%s XP)\n", prefix, e.UserID, e.Level, formatLeaderboardXP(e.TotalXP)))
+			fmt.Fprintf(&sb, "%s <@%d> — Lv.%d (%s XP)\n", prefix, e.UserID, e.Level, formatLeaderboardXP(e.TotalXP))
 		}
 		components = append(components, discord.NewTextDisplay(sb.String()))
 	}
