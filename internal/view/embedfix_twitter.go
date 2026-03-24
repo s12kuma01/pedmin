@@ -37,12 +37,8 @@ func BuildTweetComponents(tweet *model.Tweet, ref model.EmbedRef, text, footerOv
 	if len(tweet.Media) > 0 {
 		items := make([]discord.MediaGalleryItem, 0, len(tweet.Media))
 		for _, m := range tweet.Media {
-			mediaURL := m.URL
-			if m.Type == "video" && m.ThumbnailURL != "" {
-				mediaURL = m.ThumbnailURL
-			}
 			items = append(items, discord.MediaGalleryItem{
-				Media: discord.UnfurledMediaItem{URL: mediaURL},
+				Media: discord.UnfurledMediaItem{URL: m.URL},
 			})
 		}
 		components = append(components, discord.NewMediaGallery(items...))
