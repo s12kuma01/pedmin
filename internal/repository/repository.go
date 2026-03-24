@@ -62,12 +62,34 @@ type CounterHit struct {
 	UserID    snowflake.ID
 }
 
+// LevelingStore handles user XP and role reward persistence.
+type LevelingStore interface {
+	GetUserXP(guildID, userID snowflake.ID) (*model.UserXP, error)
+	AddXP(guildID, userID snowflake.ID, amount int, isVoice bool) (*model.UserXP, int, error)
+	GetLeaderboard(guildID snowflake.ID, limit, offset int) ([]model.LeaderboardEntry, error)
+	GetUserRank(guildID, userID snowflake.ID) (int, error)
+	GetRoleRewards(guildID snowflake.ID) ([]model.LevelRoleReward, error)
+	AddRoleReward(guildID snowflake.ID, level int, roleID snowflake.ID) error
+	RemoveRoleReward(id int64, guildID snowflake.ID) error
+	CountRoleRewards(guildID snowflake.ID) (int, error)
+	BatchAddVoiceXP(updates []VoiceXPUpdate) error
+}
+
+// VoiceXPUpdate is a single voice XP grant for batch processing.
+type VoiceXPUpdate struct {
+	GuildID  snowflake.ID
+	UserID   snowflake.ID
+	Minutes  int
+	XPAmount int
+}
+
 // GuildStore is the composite persistence interface embedding all domain stores.
 type GuildStore interface {
 	SettingsStore
 	TicketStore
 	RSSStore
 	CounterStore
+	LevelingStore
 	Close() error
 }
 
