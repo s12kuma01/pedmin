@@ -96,6 +96,13 @@ func main() {
 	b.Register(rssHandler)
 	rssPoller := service.NewRSSPoller(b, rssSvc, guildStore, config.DefaultRSSPollInterval, logger)
 
+	// --- Counter ---
+
+	counterSvc := service.NewCounterService(guildStore, logger)
+	counterHandler := handler.NewCounterHandler(b, counterSvc, logger)
+	handler.SetupCounterListeners(b.Client, counterHandler)
+	b.Register(counterHandler)
+
 	// --- Panel ---
 
 	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, config.DefaultPanelPowerTimeout)

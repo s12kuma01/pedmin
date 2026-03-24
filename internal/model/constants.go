@@ -17,7 +17,11 @@ const (
 	PingModuleID       = "ping"
 	AvatarModuleID     = "avatar"
 	FuckfetchModuleID  = "fuckfetch"
+	CounterModuleID    = "counter"
 
 	// MaxRSSFeedsPerGuild limits the number of RSS feeds per guild.
 	MaxRSSFeedsPerGuild = 10
+
+	// MaxCountersPerGuild limits the number of word counters per guild.
+	MaxCountersPerGuild = 10
 )
