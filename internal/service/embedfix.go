@@ -125,7 +125,7 @@ func (s *EmbedFixService) processTwitterEmbed(ctx context.Context, channelID, me
 	}
 
 	msg := view.BuildTweetEmbed(tweet, ref)
-	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID)); err != nil {
+	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send tweet embed",
 			slog.String("tweet_id", tweetID),
 			slog.Any("error", err),
@@ -147,7 +147,7 @@ func (s *EmbedFixService) processRedditEmbed(ctx context.Context, channelID, mes
 	}
 
 	msg := view.BuildRedditEmbed(post, ref)
-	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID)); err != nil {
+	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send reddit embed",
 			slog.String("post_id", postID),
 			slog.Any("error", err),
@@ -169,7 +169,7 @@ func (s *EmbedFixService) processTikTokEmbed(ctx context.Context, channelID, mes
 	}
 
 	msg := view.BuildTikTokEmbed(video, ref)
-	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID)); err != nil {
+	if _, err = s.discordClient.Rest.CreateMessage(channelID, msg.WithMessageReferenceByID(messageID).WithAllowedMentions(&discord.AllowedMentions{})); err != nil {
 		s.logger.Warn("failed to send tiktok embed",
 			slog.String("video_id", videoID),
 			slog.Any("error", err),
