@@ -103,6 +103,14 @@ func main() {
 	handler.SetupCounterListeners(b.Client, counterHandler)
 	b.Register(counterHandler)
 
+	// --- Leveling ---
+
+	levelingSvc := service.NewLevelingService(b.Client, guildStore, logger)
+	levelingHandler := handler.NewLevelingHandler(b, levelingSvc, logger)
+	handler.SetupLevelingListeners(b.Client, levelingHandler)
+	b.Register(levelingHandler)
+	levelingSvc.StartVoiceTicker(context.Background())
+
 	// --- Panel ---
 
 	panelClient := client.NewPelicanClient(cfg.PanelURL, cfg.PanelAPIKey, config.DefaultPanelPowerTimeout)
@@ -150,6 +158,7 @@ func main() {
 
 	logger.Info("shutting down...")
 	playerHandler.Shutdown()
+	levelingHandler.Shutdown()
 	rssPoller.StopPoller()
 	b.Close(context.Background())
 	if err := guildStore.Close(); err != nil {
