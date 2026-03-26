@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
 )
 
 // CounterManagePanel builds the counter management panel.

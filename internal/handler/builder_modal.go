@@ -9,9 +9,9 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/ui"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 func (h *BuilderHandler) HandleModal(e *events.ModalSubmitInteractionCreate) {

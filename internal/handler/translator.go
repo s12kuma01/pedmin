@@ -10,10 +10,10 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/module"
-	"github.com/s12kuma01/pedmin/internal/service"
-	"github.com/s12kuma01/pedmin/pkg/deepl"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/internal/service"
+	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 
 	disgobot "github.com/disgoorg/disgo/bot"
 )

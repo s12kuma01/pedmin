@@ -12,9 +12,9 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/disgolink/v3/lavalink"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/service"
-	"github.com/s12kuma01/pedmin/internal/ui"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/internal/service"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 func (h *PlayerHandler) handleComponent(e *events.ComponentInteractionCreate) {

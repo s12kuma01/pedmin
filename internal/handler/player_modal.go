@@ -6,8 +6,8 @@ package handler
 import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
 )
 
 func (h *PlayerHandler) handleModal(e *events.ModalSubmitInteractionCreate) {

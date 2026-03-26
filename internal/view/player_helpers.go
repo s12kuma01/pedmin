@@ -9,7 +9,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgolink/v3/lavalink"
-	"github.com/s12kuma01/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
 )
 
 // BuildThumbnail builds a thumbnail component from track info artwork.

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // BuilderEditPanel builds the edit mode view for a panel.

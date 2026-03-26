@@ -1,4 +1,4 @@
-module github.com/s12kuma01/pedmin
+module github.com/Sumire-Labs/pedmin
 
 go 1.26.1
 

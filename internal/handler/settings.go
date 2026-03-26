@@ -11,9 +11,9 @@ import (
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/omit"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/module"
-	"github.com/s12kuma01/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
 )
 
 // SettingsBot defines the bot interface needed by the settings handler.

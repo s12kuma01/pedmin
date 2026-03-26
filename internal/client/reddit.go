@@ -11,7 +11,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // RedditClient fetches post data from the Reddit public JSON API.

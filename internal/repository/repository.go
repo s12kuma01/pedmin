@@ -10,7 +10,7 @@ import (
 
 	"github.com/disgoorg/snowflake/v2"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // SettingsStore handles guild-level module configuration.

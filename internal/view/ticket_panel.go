@@ -5,7 +5,7 @@ package view
 
 import (
 	"github.com/disgoorg/disgo/discord"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // TicketPanel builds the ticket creation panel message.

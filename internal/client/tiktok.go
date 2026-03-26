@@ -12,7 +12,7 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // TikTokClient fetches video data from the tikwm.com proxy API.

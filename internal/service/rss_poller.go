@@ -9,8 +9,8 @@ import (
 	"time"
 
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/repository"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/repository"
 )
 
 // RSSPollerBot is the interface the poller uses to check if a module is enabled.

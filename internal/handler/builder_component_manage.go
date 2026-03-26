@@ -10,7 +10,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 func (h *BuilderHandler) handleManage(e *events.ComponentInteractionCreate, panelID string) {

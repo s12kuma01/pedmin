@@ -8,7 +8,7 @@ import (
 
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // SetupTranslatorListeners registers the translator's event listeners on the Discord client.

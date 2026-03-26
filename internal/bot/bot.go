@@ -14,9 +14,9 @@ import (
 	"github.com/disgoorg/disgo/gateway"
 	"github.com/disgoorg/disgolink/v3/disgolink"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/config"
-	"github.com/s12kuma01/pedmin/internal/module"
-	"github.com/s12kuma01/pedmin/internal/repository"
+	"github.com/Sumire-Labs/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/internal/repository"
 )
 
 type Bot struct {

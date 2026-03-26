@@ -11,7 +11,7 @@ import (
 	"time"
 
 	"github.com/disgoorg/disgo/gateway"
-	"github.com/s12kuma01/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/config"
 	"github.com/shirou/gopsutil/v4/process"
 )
 

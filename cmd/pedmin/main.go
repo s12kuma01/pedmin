@@ -11,13 +11,13 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/s12kuma01/pedmin/config"
-	"github.com/s12kuma01/pedmin/internal/bot"
-	"github.com/s12kuma01/pedmin/internal/client"
-	"github.com/s12kuma01/pedmin/internal/handler"
-	"github.com/s12kuma01/pedmin/internal/repository"
-	"github.com/s12kuma01/pedmin/internal/service"
-	"github.com/s12kuma01/pedmin/pkg/deepl"
+	"github.com/Sumire-Labs/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/internal/bot"
+	"github.com/Sumire-Labs/pedmin/internal/client"
+	"github.com/Sumire-Labs/pedmin/internal/handler"
+	"github.com/Sumire-Labs/pedmin/internal/repository"
+	"github.com/Sumire-Labs/pedmin/internal/service"
+	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 )
 
 func main() {

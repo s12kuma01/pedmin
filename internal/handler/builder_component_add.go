@@ -9,8 +9,8 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 func (h *BuilderHandler) handleAddTextPrompt(e *events.ComponentInteractionCreate, panelID string) {

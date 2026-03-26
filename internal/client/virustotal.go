@@ -14,7 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // ScanURL queries VirusTotal for URL analysis results.

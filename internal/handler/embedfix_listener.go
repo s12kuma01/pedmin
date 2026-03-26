@@ -7,7 +7,7 @@ import (
 	"context"
 
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 func (h *EmbedFixHandler) onMessageCreate(e *events.GuildMessageCreate) {

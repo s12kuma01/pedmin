@@ -10,7 +10,7 @@ import (
 
 	"github.com/disgoorg/snowflake/v2"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 func (s *SQLiteStore) CreateTicket(guildID snowflake.ID, number int, channelID, userID snowflake.ID, subject string) error {

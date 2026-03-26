@@ -9,7 +9,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/ui"
+	"github.com/Sumire-Labs/pedmin/internal/ui"
 )
 
 // LoggerBuildAttachmentComponents builds container sub-components for a list of attachments.

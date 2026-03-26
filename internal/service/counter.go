@@ -12,8 +12,8 @@ import (
 
 	"github.com/disgoorg/snowflake/v2"
 
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/repository"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/repository"
 )
 
 // CounterService handles word counter business logic with an in-memory regex cache.

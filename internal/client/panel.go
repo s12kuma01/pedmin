@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 type PelicanClient struct {

@@ -8,7 +8,7 @@ import (
 
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/pkg/deepl"
+	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 )
 
 // BuildTranslationEmbed builds the translation result message.

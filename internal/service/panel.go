@@ -7,8 +7,8 @@ import (
 	"context"
 	"time"
 
-	"github.com/s12kuma01/pedmin/internal/client"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/client"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // PanelService handles game server management operations via the Pelican API.

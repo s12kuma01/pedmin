@@ -7,8 +7,8 @@ import (
 	"context"
 	"net/url"
 
-	"github.com/s12kuma01/pedmin/internal/client"
-	"github.com/s12kuma01/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/client"
+	"github.com/Sumire-Labs/pedmin/internal/model"
 )
 
 // URLService wraps the URL client with validation logic.

@@ -9,8 +9,8 @@ import (
 
 	"github.com/disgoorg/disgo/rest"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/internal/view"
-	"github.com/s12kuma01/pedmin/pkg/deepl"
+	"github.com/Sumire-Labs/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 )
 
 // TranslatorService handles message translation logic.

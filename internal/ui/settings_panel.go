@@ -7,7 +7,7 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/s12kuma01/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/internal/module"
 )
 
 // settingsModuleID is the CustomID prefix for settings panel routing.

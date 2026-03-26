@@ -9,10 +9,10 @@ import (
 	"strings"
 
 	"github.com/disgoorg/disgo/events"
-	"github.com/s12kuma01/pedmin/config"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/service"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/service"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 func (h *URLHandler) HandleModal(e *events.ModalSubmitInteractionCreate) {

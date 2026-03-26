@@ -9,12 +9,12 @@ import (
 	"github.com/disgoorg/disgo/discord"
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/config"
-	"github.com/s12kuma01/pedmin/internal/client"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/module"
-	"github.com/s12kuma01/pedmin/internal/service"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/internal/client"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/internal/service"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 // URLHandler implements module.Module for the URL tools feature.

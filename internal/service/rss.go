@@ -13,9 +13,9 @@ import (
 	disgobot "github.com/disgoorg/disgo/bot"
 	"github.com/disgoorg/snowflake/v2"
 	"github.com/mmcdole/gofeed"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/internal/repository"
-	"github.com/s12kuma01/pedmin/internal/view"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/internal/repository"
+	"github.com/Sumire-Labs/pedmin/internal/view"
 )
 
 // RSSService handles RSS feed CRUD and posting logic.

@@ -8,8 +8,8 @@ import (
 
 	"github.com/disgoorg/disgo/events"
 	"github.com/disgoorg/snowflake/v2"
-	"github.com/s12kuma01/pedmin/config"
-	"github.com/s12kuma01/pedmin/internal/module"
+	"github.com/Sumire-Labs/pedmin/config"
+	"github.com/Sumire-Labs/pedmin/internal/module"
 )
 
 // Bot's own voice state/server updates are forwarded to Lavalink so it can

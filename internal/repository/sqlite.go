@@ -13,7 +13,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/s12kuma01/pedmin/migrations"
+	"github.com/Sumire-Labs/pedmin/migrations"
 	_ "modernc.org/sqlite"
 )
 

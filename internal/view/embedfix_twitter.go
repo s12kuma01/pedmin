@@ -7,8 +7,8 @@ import (
 	"fmt"
 
 	"github.com/disgoorg/disgo/discord"
-	"github.com/s12kuma01/pedmin/internal/model"
-	"github.com/s12kuma01/pedmin/pkg/deepl"
+	"github.com/Sumire-Labs/pedmin/internal/model"
+	"github.com/Sumire-Labs/pedmin/pkg/deepl"
 )
 
 // BuildTweetEmbed builds a tweet embed message.
